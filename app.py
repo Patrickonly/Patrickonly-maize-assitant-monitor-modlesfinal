@@ -325,14 +325,15 @@ def is_likely_maize_leaf(image_path):
 
 
 def validate_maize_image_with_yolo(image_path):
-    if yolo_model is None:
+    y_model = get_yolo_model()
+    if y_model is None:
         return {
             'valid': False,
             'detected_objects': ['Validation model unavailable'],
         }
 
     try:
-        results = yolo_model.predict(source=image_path, conf=0.25, verbose=False)
+        results = y_model.predict(source=image_path, conf=0.25, verbose=False)
         detected_objects = []
         for result in results:
             if result.boxes is None:
@@ -404,17 +405,6 @@ def build_farmer_image_report(label_name, confidence):
         'Urgency Level:\nCheck needed'
     )
 
-try:
-    import joblib
-    for model_path in JOBLIB_MODEL_PATHS:
-        if os.path.exists(model_path):
-            joblib_model = joblib.load(model_path)
-            loaded_joblib_model_path = model_path
-            print('Loaded joblib text model:', model_path)
-            break
-except Exception as e:
-    pass
-
 # Load and parse response map for text answers (versioned first)
 response_map_loaded = False
 for response_path in RESPONSE_MAP_PATHS:
@@ -422,10 +412,8 @@ for response_path in RESPONSE_MAP_PATHS:
         try:
             with open(response_path, 'r', encoding='utf-8') as f:
                 raw_response_map = json.load(f)
-                # Parse responses: if comma-separated, convert to list
                 for key, value in raw_response_map.items():
                     if isinstance(value, str) and ',' in value:
-                        # Split comma-separated responses into list
                         response_map[key] = [v.strip() for v in value.split(',')]
                     else:
                         response_map[key] = value
@@ -443,7 +431,6 @@ for labels_path in INTENT_LABELS_PATHS:
         try:
             with open(labels_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                # Handle both list format and dict with "intent_list" key
                 if isinstance(data, dict) and 'intent_list' in data:
                     intent_labels = data['intent_list']
                 elif isinstance(data, list):
@@ -464,56 +451,61 @@ if os.path.exists(DISEASE_LABELS_PATH):
     except Exception as e:
         pass
 else:
-    # Fallback: Use default disease classes
     labels_list = [
-        'Healthy_maize',
-        'Common_Rust_disease',
-        'Gray_Leaf_Spot_disease',
-        'Leaf_Blight_disease',
-        'Downy_Mildew_disease',
-        'Maize_Streak_Virus_disease',
+        'Healthy_maize', 'Common_Rust_disease', 'Gray_Leaf_Spot_disease',
+        'Leaf_Blight_disease', 'Downy_Mildew_disease', 'Maize_Streak_Virus_disease',
         'Maize_Lethal_Necrosis_disease'
     ]
     print(f'Using default disease labels ({len(labels_list)} classes)')
 
+def get_joblib_model():
+    global joblib_model, loaded_joblib_model_path
+    if joblib_model is None:
+        try:
+            import joblib
+            for model_path in JOBLIB_MODEL_PATHS:
+                if os.path.exists(model_path):
+                    joblib_model = joblib.load(model_path)
+                    loaded_joblib_model_path = model_path
+                    print('Loaded joblib text model:', model_path)
+                    break
+        except Exception as e:
+            print("Joblib load error:", e)
+    return joblib_model
 
-# Try loading trained Keras CNN image classification model (versioned first)
-keras_model = None
-keras_input_shape = None
-# Try versioned models first (_v1.0, _v1), then fall back to legacy names
-KERAS_MODEL_PATHS = [
-    'maizediseaseprogression.keras',
-    'modelmaize_detection_v1.0.keras',
-    'modelmaize_detection_v1.keras',
-    'modelmaize_detection.keras',
-    'modelmaize_detection.h5',
-]
+def get_keras_model():
+    global keras_model, keras_input_shape, loaded_keras_model_path
+    if keras_model is None:
+        try:
+            import tensorflow as tf
+            # Reduce verbose TF logs
+            tf.get_logger().setLevel('ERROR')
+            from tensorflow.keras.models import load_model
+            for model_path in KERAS_MODEL_PATHS:
+                if os.path.exists(model_path):
+                    keras_model = load_model(model_path)
+                    keras_input_shape = getattr(keras_model, 'input_shape', (None, 224, 224, 3))
+                    loaded_keras_model_path = model_path
+                    print(f'Loaded Keras model: {model_path}')
+                    break
+        except Exception as e:
+            print("Keras load error:", e)
+    return keras_model
 
-try:
-    from tensorflow.keras.models import load_model
-    for model_path in KERAS_MODEL_PATHS:
-        if os.path.exists(model_path):
-            keras_model = load_model(model_path)
-            keras_input_shape = getattr(keras_model, 'input_shape', (None, 224, 224, 3))
-            loaded_keras_model_path = model_path
-            print(f'Loaded Keras model: {model_path}')
-            print(f'  Input shape: {keras_input_shape}')
-            print(f'  Output classes: {keras_model.output_shape[-1]}')
-            break
-except Exception as e:
-    pass
-
-
-try:
-    from ultralytics import YOLO
-    for model_path in YOLO_MODEL_PATHS:
-        if os.path.exists(model_path):
-            yolo_model = YOLO(model_path)
-            loaded_yolo_model_path = model_path
-            print(f'Loaded YOLO validation model: {model_path}')
-            break
-except Exception as e:
-    pass
+def get_yolo_model():
+    global yolo_model, loaded_yolo_model_path
+    if yolo_model is None:
+        try:
+            from ultralytics import YOLO
+            for model_path in YOLO_MODEL_PATHS:
+                if os.path.exists(model_path):
+                    yolo_model = YOLO(model_path)
+                    loaded_yolo_model_path = model_path
+                    print(f'Loaded YOLO validation model: {model_path}')
+                    break
+        except Exception as e:
+            print("YOLO load error:", e)
+    return yolo_model
 
 
 @app.route('/')
@@ -572,7 +564,7 @@ def api_predict():
             
             print(f"\n[IMAGE PREDICTION] File: {filename}")
             print(f"  Labels loaded: {len(labels_list)} classes")
-            print(f"  Model available: {keras_model is not None}")
+            print(f"  Model available: {get_keras_model() is not None}")
 
             # Stage 1: YOLOv8 image validation gate
             validation = validate_maize_image_with_yolo(save_path)
@@ -588,7 +580,8 @@ def api_predict():
                     report=invalid_report,
                 )
 
-            if keras_model is not None:
+            k_model = get_keras_model()
+            if k_model is not None:
                 try:
                     from tensorflow.keras.preprocessing import image
                     import numpy as np
@@ -607,7 +600,7 @@ def api_predict():
                     x = x / 255.0
                     
                     # Predict
-                    preds = keras_model.predict(x, verbose=0)
+                    preds = k_model.predict(x, verbose=0)
                     print(f"  Predictions shape: {preds.shape}")
                     
                     if preds is None or len(preds) == 0:
@@ -662,7 +655,7 @@ def api_predict():
             save_path, filename = _decode_image_data(image_data)
             print(f"\n[IMAGE PREDICTION] File: {filename}")
             print(f"  Labels loaded: {len(labels_list)} classes")
-            print(f"  Model available: {keras_model is not None}")
+            print(f"  Model available: {get_keras_model() is not None}")
 
             validation = validate_maize_image_with_yolo(save_path)
             if not validation['valid']:
@@ -679,7 +672,8 @@ def api_predict():
                     file_name=filename,
                 )
 
-            if keras_model is None:
+            k_model = get_keras_model()
+            if k_model is None:
                 return api_response(False, status=503, error='No image classification model available on server')
 
             from tensorflow.keras.preprocessing import image
@@ -695,7 +689,7 @@ def api_predict():
             x = np.expand_dims(x, axis=0)
             x = x / 255.0
 
-            preds = keras_model.predict(x, verbose=0)
+            preds = k_model.predict(x, verbose=0)
             preds_array = preds[0] if len(preds.shape) > 1 else preds
             label_index = int(np.argmax(preds_array))
 
@@ -735,11 +729,12 @@ def api_predict():
 
         print(f"\n[TEXT PREDICTION] Question: {question}")
 
+        j_model = get_joblib_model()
         # If we have a joblib model, use it for text prediction
-        if joblib_model is not None:
+        if j_model is not None:
             try:
                 cleaned_question = question.lower().strip()
-                pred = joblib_model.predict([cleaned_question])
+                pred = j_model.predict([cleaned_question])
                 label = str(pred[0]).strip().lower()
                 print(f"  Model predicted label: {label}")
                 print(f"  Cleaned question: {cleaned_question}")
