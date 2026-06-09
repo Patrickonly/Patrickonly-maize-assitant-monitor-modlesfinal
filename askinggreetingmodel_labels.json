@@ -1,0 +1,55 @@
+{
+  "intent_list": [
+    "advice",
+    "agriculture",
+    "capabilities",
+    "command",
+    "date_question",
+    "disease_info",
+    "education",
+    "goodbye",
+    "gratitude",
+    "greeting",
+    "help",
+    "identity",
+    "maize_question",
+    "maize_symptom",
+    "monitoring",
+    "progression",
+    "smalltalk",
+    "uncertainty"
+  ],
+  "metadata": {
+    "model_name": "askinggreetingmodel",
+    "version": "1.0",
+    "timestamp": "2026-05-13T13:18:06.929872",
+    "model_type": "Logistic Regression (TF-IDF)",
+    "intents": [
+      "advice",
+      "agriculture",
+      "capabilities",
+      "command",
+      "date_question",
+      "disease_info",
+      "education",
+      "goodbye",
+      "gratitude",
+      "greeting",
+      "help",
+      "identity",
+      "maize_question",
+      "maize_symptom",
+      "monitoring",
+      "progression",
+      "smalltalk",
+      "uncertainty"
+    ],
+    "num_training_samples": 111,
+    "features": [
+      "Intent classification",
+      "Disease question answering",
+      "Learning support",
+      "Farmer-friendly guidance"
+    ]
+  }
+}

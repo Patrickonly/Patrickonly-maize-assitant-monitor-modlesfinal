@@ -1,0 +1,26 @@
+# Ignore dataset folders
+Common_Rust_disease/
+Downy_Mildew_disease/
+Gray_Leaf_Spot_disease/
+Healthy_maize/
+Leaf_Blight_disease/
+Maize_Lethal_Necrosis_disease/
+Maize_Streak_Virus_disease/
+
+# Also ignore the lowercase actual folder names
+blight/
+common_rust/
+downy_mildew/
+gray_leaf_spot/
+healthy/
+mln_lethal_necrosis/
+msv_streak_virus/
+
+# Ignore pycache and virtual environment
+__pycache__/
+.venv/
+.sixth/
+
+# DO NOT ignore keras and joblib files
+!*.keras
+!*.joblib

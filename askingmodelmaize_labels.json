@@ -1,0 +1,22 @@
+{
+  "intent_list": [
+    "advice",
+    "agriculture",
+    "capabilities",
+    "command",
+    "date_question",
+    "disease_info",
+    "education",
+    "goodbye",
+    "gratitude",
+    "greeting",
+    "help",
+    "identity",
+    "maize_question",
+    "maize_symptom",
+    "monitoring",
+    "progression",
+    "smalltalk",
+    "uncertainty"
+  ]
+}

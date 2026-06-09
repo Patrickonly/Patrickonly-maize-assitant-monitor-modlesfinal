@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Maize Health Monitor</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --panel-soft: #f8fafc;
+      --border: #e5eaf1;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --green: #22c55e;
+      --green-soft: #e9f9ef;
+      --green-2: #16a34a;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+      --sidebar: #ffffff;
+      --bubble-user: linear-gradient(135deg, #22c55e, #16a34a);
+      --bubble-assistant: #f8fafc;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(180deg, #fafbfc 0%, #f4f6f9 100%);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+    }
+
+    .sidebar {
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 8px;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--green-soft);
+      border: 1px solid #d8f3df;
+      color: var(--green-2);
+      font-size: 1.05rem;
+      flex: 0 0 auto;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1rem;
+      line-height: 1.1;
+    }
+
+    .side-button {
+      border: 1px dashed #b9e9c5;
+      background: #fff;
+      color: var(--green);
+      border-radius: 18px;
+      padding: 16px 18px;
+      text-align: left;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 6px 18px rgba(34, 197, 94, 0.05);
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 12px;
+      border-radius: 14px;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    .nav-item.active {
+      background: #f0fbf3;
+      color: var(--green-2);
+    }
+
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .sign-btn, .ghost-btn {
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .sign-btn {
+      background: var(--green);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 12px 24px rgba(34, 197, 94, 0.18);
+    }
+
+    .ghost-btn {
+      background: white;
+      color: var(--green);
+    }
+
+    .sign-btn:hover, .ghost-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 24px;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .back-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: white;
+      color: #334155;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    .title-block {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.32em;
+      color: #4ade80;
+      font-size: 0.72rem;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+
+    .page-title {
+      margin: 0;
+      font-size: 1.8rem;
+      line-height: 1.1;
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .theme-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: white;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    .content {
+      padding: 24px;
+      overflow: auto;
+    }
+
+    .section-title {
+      margin: 2px 0 2px;
+      font-size: 1.4rem;
+    }
+
+    .section-subtitle {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+
+    .hero-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      min-height: 380px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 760px;
+    }
+
+    .hero-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 18px;
+      background: var(--green-soft);
+      color: var(--green-2);
+      font-size: 2rem;
+      border: 1px solid #d8f3df;
+    }
+
+    .hero-inner h2 {
+      margin: 0;
+      font-size: clamp(1.7rem, 2.5vw, 2.3rem);
+    }
+
+    .hero-inner p {
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.6;
+      margin: 10px auto 0;
+      max-width: 620px;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: #f0fbf3;
+      color: var(--green-2);
+      font-weight: 700;
+      border: 1px solid #d8f3df;
+    }
+
+    .prompt-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 22px;
+    }
+
+    .prompt-pill {
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fafafa;
+      color: #4b5563;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+    }
+
+    .composer-shell {
+      padding: 0 24px 24px;
+    }
+
+    .composer-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 16px 16px 14px;
+    }
+
+    .attachment {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+      border: 2px solid #d8f3df;
+      background: #f8fff9;
+      border-radius: 18px;
+      margin-bottom: 12px;
+    }
+
+    .attachment.show { display: flex; }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .attachment-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 2px solid #22c55e;
+      display: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+    }
+
+    .thumb-preview {
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+      border-radius: 14px;
+      border: 2px solid #22c55e;
+      object-fit: cover;
+      display: none;
+      box-shadow: 0 6px 16px rgba(34, 197, 94, 0.2);
+      margin: 8px 0;
+    }
+
+    .thumb-preview.show { display: block; }
+
+    .file-name {
+      font-weight: 700;
+      color: #223047;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+
+    .remove-link {
+      border: none;
+      background: transparent;
+      color: var(--green-2);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .composer-row {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr) 56px;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(180deg, #ffffff, #fbfdfb);
+      border-radius: 28px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    .composer-hint {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.94rem;
+      text-align: center;
+    }
+
+    .icon-btn, .send-btn {
+      border: none;
+      cursor: pointer;
+      border-radius: 18px;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .icon-btn {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(180deg, #f1fbf4, #e8f9ee);
+      border: 1px solid #d8f3df;
+      color: var(--green-2);
+      font-size: 1.1rem;
+      flex: 0 0 auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+    }
+
+    .composer textarea {
+      flex: 1;
+      min-height: 56px;
+      height: 56px;
+      max-height: 170px;
+      resize: none;
+      border: none;
+      outline: none;
+      font: inherit;
+      font-size: 1.08rem;
+      line-height: 1.45;
+      color: #1f2937;
+      padding: 14px 12px;
+      background: transparent;
+      overflow: auto;
+    }
+
+    .composer textarea::placeholder {
+      color: #94a3b8;
+    }
+
+    .send-btn {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      border: 1px solid transparent;
+      font-size: 1.15rem;
+      flex: 0 0 auto;
+      box-shadow: 0 10px 22px rgba(34, 197, 94, 0.24);
+    }
+
+    .icon-btn:disabled, .send-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .icon-btn:hover, .send-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+    }
+
+    .icon-btn:focus-visible, .send-btn:focus-visible, .composer textarea:focus-visible {
+      outline: 3px solid rgba(34, 197, 94, 0.18);
+      outline-offset: 2px;
+    }
+
+    .loading-line {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      color: var(--green-2);
+      font-weight: 700;
+      justify-content: center;
+    }
+
+    .loading-line.active { display: flex; }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 3px solid rgba(34, 197, 94, 0.2);
+      border-top-color: var(--green);
+      border-right-color: var(--green);
+      animation: spin 0.9s linear infinite, float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .error-box {
+      margin-top: 12px;
+      color: #b91c1c;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 12px 14px;
+      border-radius: 16px;
+      display: none;
+    }
+
+    .error-box.show { display: block; }
+
+    .result-card {
+      margin-top: 14px;
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+    }
+
+    .result-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin: 0 0 6px;
+    }
+
+    .report-body {
+      margin-top: 8px;
+      color: #334155;
+      line-height: 1.6;
+      display: grid;
+      gap: 6px;
+    }
+
+    .report-main-title {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+
+    .report-heading {
+      font-weight: 700;
+      color: #1f2937;
+      margin-top: 6px;
+    }
+
+    .report-line {
+      color: #334155;
+    }
+
+    .result-label {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 6px;
+    }
+
+    .confidence-bar {
+      width: 100%;
+      height: 10px;
+      background: #e9eef5;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      border-radius: inherit;
+    }
+
+    .prob-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .prob-item {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .prob-item-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .prob-item-value {
+      margin-top: 5px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--green-2);
+    }
+
+    .footer {
+      padding: 0 24px 20px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .chat-row {
+      margin-top: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .msg {
+      display: flex;
+    }
+
+    .msg.user { justify-content: flex-end; }
+    .msg.assistant { justify-content: flex-start; }
+
+    .msg-bubble {
+      max-width: min(760px, 90%);
+      border-radius: 20px;
+      padding: 14px 16px;
+      line-height: 1.6;
+    }
+
+    .msg-bubble.user {
+      background: var(--bubble-user);
+      color: white;
+    }
+
+    .msg-bubble.assistant {
+      background: white;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 1000px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .topbar, .content, .composer-shell, .footer {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .hero-card {
+        padding: 20px;
+      }
+
+      .composer-row {
+        grid-template-columns: 1fr;
+      }
+
+      .send-btn {
+        width: 100%;
+      }
+
+      .icon-btn {
+        width: 100%;
+      }
+
+      .composer textarea {
+        min-height: 82px;
+        height: 82px;
+      }
+
+      .theme-pill {
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand-row">
+        <div class="brand-logo">🌽</div>
+        <div class="brand-title">Smart Maize</div>
+      </div>
+
+      <button class="side-button" type="button">＋ New Analysis</button>
+
+      <nav class="nav-list" aria-label="Sidebar navigation">
+        <div class="nav-item active"><span class="nav-icon">☷</span>Dashboard</div>
+        <div class="nav-item"><span class="nav-icon">↺</span>Recent Analyses</div>
+        <div class="nav-item"><span class="nav-icon">⚙</span>Settings</div>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <button class="sign-btn" type="button">Sign In</button>
+        <button class="ghost-btn" type="button">Create Account</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="back-btn" type="button" title="Back">←</button>
+          <div class="title-block">
+            <div class="eyebrow">Smart Maize Health Monitor</div>
+            <h1 class="page-title">New Analysis</h1>
+            <div class="page-subtitle">AI assistant workspace for maize diagnosis</div>
+          </div>
+        </div>
+        <div class="theme-pill">🌙 Dark ✨</div>
+      </header>
+
+      <section class="content">
+        <h2 class="section-title">Analysis Assistant</h2>
+        <p class="section-subtitle">Diagnose maize leaf conditions with AI guidance</p>
+
+        <div class="hero-card">
+          <div class="hero-inner">
+            <div class="hero-icon">🌿</div>
+            <h2>Where should we begin?</h2>
+            <p>
+              Start a new analysis by asking a question or uploading a maize image.
+              The assistant will show a clear answer and let you know when it is still generating.
+            </p>
+            <div class="prompt-row">
+              <div class="prompt-pill" onclick="setQuickPrompt(this.innerText)">Brown spots on lower leaves</div>
+              <div class="prompt-pill" onclick="setQuickPrompt(this.innerText)">Yellowing after heavy rain</div>
+              <div class="prompt-pill" onclick="setQuickPrompt(this.innerText)">Leaf edges drying quickly</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-row" id="chatStream">
+          <div class="msg assistant">
+            <div class="msg-bubble assistant">
+              Start by typing a question or uploading a leaf image. I’ll show the response here.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="composer-shell">
+        <div class="composer-card">
+          <div id="attachmentBar" class="attachment">
+            <div class="attachment-top">
+              <div class="file-info">
+                <img id="fileThumb" class="thumb" alt="preview" />
+                <div style="min-width:0;">
+                  <div id="fileName" class="file-name"></div>
+                  <div id="fileSub" class="file-sub"></div>
+                </div>
+              </div>
+              <button type="button" class="remove-link" onclick="clearAttachment()">Remove</button>
+            </div>
+            <img id="filePreview" class="thumb-preview" alt="image preview" />
+          </div>
+
+          <form id="composerForm">
+            <input type="file" id="imageInput" accept="image/jpeg,image/png" hidden />
+            <div class="composer-row">
+              <button type="button" class="icon-btn" onclick="document.getElementById('imageInput').click()" title="Attach image">⬆</button>
+              <textarea id="questionInput" placeholder="Upload an image and describe the symptoms..."></textarea>
+              <button type="submit" class="send-btn" title="Send">➤</button>
+            </div>
+            <div class="composer-hint">Tip: type your question, or attach a maize leaf image and describe what you see.</div>
+          </form>
+
+          <div class="loading-line" id="loadingLine">
+            <div class="spinner"></div>
+            <div id="loadingText">Hold on — generating your answer…</div>
+          </div>
+
+          <div id="errorBox" class="error-box"></div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div>© 2026 Smart Maize Health Monitor. All rights reserved.</div>
+        <div>Crop health monitoring platform</div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const form = document.getElementById('composerForm');
+    const questionInput = document.getElementById('questionInput');
+    const imageInput = document.getElementById('imageInput');
+    const chatStream = document.getElementById('chatStream');
+    const loadingLine = document.getElementById('loadingLine');
+    const loadingText = document.getElementById('loadingText');
+    const errorBox = document.getElementById('errorBox');
+    const attachmentBar = document.getElementById('attachmentBar');
+    const fileThumb = document.getElementById('fileThumb');
+    const fileName = document.getElementById('fileName');
+    const fileSub = document.getElementById('fileSub');
+    const sendButton = document.querySelector('.send-btn');
+    const attachButton = document.querySelector('.icon-btn');
+
+    let attachedFile = null;
+    let attachedPreviewUrl = null;
+    let isGenerating = false;
+
+    imageInput.addEventListener('change', handleImageSelect);
+    form.addEventListener('submit', submitRequest);
+
+    questionInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    function setQuickPrompt(text) {
+      questionInput.value = text;
+      questionInput.focus();
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function appendMessage(role, html) {
+      const row = document.createElement('div');
+      row.className = `msg ${role}`;
+      const bubble = document.createElement('div');
+      bubble.className = `msg-bubble ${role}`;
+      bubble.innerHTML = html;
+      row.appendChild(bubble);
+      chatStream.appendChild(row);
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    function showUserMessage(text, file, previewUrl) {
+      const safeText = text ? escapeHtml(text) : 'Analyzing maize leaf image...';
+      let html = `<div style="font-weight:700; margin-bottom:6px;">You</div>`;
+      
+      if (previewUrl) {
+        html += `<div style="margin-bottom:8px;"><img src="${previewUrl}" alt="uploaded leaf image" style="max-width:100%; max-height:280px; border-radius:12px; border:1px solid var(--border);"></div>`;
+      }
+      
+      html += `<div>${safeText}</div>`;
+      if (file && !previewUrl) {
+        html += `<div class="meta-line" style="margin-top:8px;"><span class="pill">📎 ${escapeHtml(file.name)}</span></div>`;
+      }
+      
+      appendMessage('user', html);
+    }
+
+    function showAssistantText(data) {
+      appendMessage('assistant', `
+        <div style="font-weight:800; margin-bottom:6px;">Assistant</div>
+        <div>${escapeHtml(data.response || 'No response returned.')}</div>
+      `);
+    }
+
+    function formatAnswerText(answerText) {
+      const lines = String(answerText || '').split('\n');
+      const html = [];
+
+      lines.forEach((line, index) => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+
+        if (index === 0) {
+          html.push(`<div class="report-main-title">${escapeHtml(trimmed)}</div>`);
+          return;
+        }
+
+        if (trimmed.endsWith(':')) {
+          html.push(`<div class="report-heading">${escapeHtml(trimmed)}</div>`);
+        } else {
+          html.push(`<div class="report-line">${escapeHtml(trimmed)}</div>`);
+        }
+      });
+
+      return html.join('');
+    }
+
+    function showAssistantImage(data) {
+      const answerText = data.answer || data.report || 'No report returned.';
+      appendMessage('assistant', `
+        <div style="font-weight:800; margin-bottom:6px;">Assistant</div>
+        <div class="result-card">
+          <div class="result-title">${escapeHtml(data.label || 'Disease result')}</div>
+          <div class="report-body">${formatAnswerText(answerText)}</div>
+        </div>
+      `);
+    }
+
+    function setLoading(show, text) {
+      isGenerating = show;
+      loadingText.textContent = text || 'Hold on — generating your answer…';
+      loadingLine.classList.toggle('active', show);
+      sendButton.disabled = show;
+      attachButton.disabled = show;
+      questionInput.disabled = show;
+      sendButton.textContent = show ? '…' : '➤';
+      attachButton.textContent = show ? '…' : '⬆';
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add('show');
+    }
+
+    function clearError() {
+      errorBox.textContent = '';
+      errorBox.classList.remove('show');
+    }
+
+    function handleImageSelect(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const allowedTypes = ['image/jpeg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        showError('Please choose a JPG, JPEG, or PNG image.');
+        imageInput.value = '';
+        return;
+      }
+
+      attachedFile = file;
+      clearError();
+      updateAttachmentPreview(file);
+    }
+
+    function updateAttachmentPreview(file) {
+      attachmentBar.classList.add('show');
+      fileName.textContent = file.name;
+      fileSub.textContent = `${Math.round(file.size / 1024)} KB • ready to upload`;
+      fileThumb.title = `Click to view ${file.name}`;
+
+      if (attachedPreviewUrl) URL.revokeObjectURL(attachedPreviewUrl);
+      attachedPreviewUrl = URL.createObjectURL(file);
+      fileThumb.src = attachedPreviewUrl;
+      fileThumb.style.display = 'block';
+      
+      // Show larger preview
+      const previewImg = document.getElementById('filePreview');
+      previewImg.src = attachedPreviewUrl;
+      previewImg.classList.add('show');
+    }
+
+    fileThumb.addEventListener('click', () => {
+      if (attachedPreviewUrl) {
+        window.open(attachedPreviewUrl, '_blank', 'noopener,noreferrer');
+      }
+    });
+
+    function clearAttachment() {
+      attachedFile = null;
+      imageInput.value = '';
+      attachmentBar.classList.remove('show');
+      fileThumb.style.display = 'none';
+      fileThumb.removeAttribute('src');
+      fileName.textContent = '';
+      fileSub.textContent = '';
+      const previewImg = document.getElementById('filePreview');
+      previewImg.classList.remove('show');
+      previewImg.removeAttribute('src');
+      if (attachedPreviewUrl) {
+        URL.revokeObjectURL(attachedPreviewUrl);
+        attachedPreviewUrl = null;
+      }
+    }
+
+    async function submitRequest(event) {
+      event.preventDefault();
+      clearError();
+
+      const question = questionInput.value.trim();
+      if (!question && !attachedFile) {
+        showError('Type a question or attach an image first.');
+        return;
+      }
+
+      if (isGenerating) {
+        return;
+      }
+
+      showUserMessage(question, attachedFile, attachedPreviewUrl);
+
+      const formData = new FormData();
+      if (question) formData.append('question', question);
+      if (attachedFile) formData.append('image', attachedFile);
+
+      setLoading(true, 'Hold on — generating your answer…');
+
+      try {
+        const response = await fetch('/api/predict', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+        setLoading(false);
+
+        if (!data.ok) {
+          showError(data.error || 'Something went wrong.');
+          return;
+        }
+
+        if (data.type === 'image') {
+          showAssistantImage(data);
+        } else {
+          showAssistantText(data);
+        }
+
+        questionInput.value = '';
+        clearAttachment();
+      } catch (error) {
+        setLoading(false);
+        showError('Network error: ' + error.message);
+      } finally {
+        if (isGenerating) {
+          setLoading(false);
+        }
+      }
+    }
+  </script>
+</body>
+</html>

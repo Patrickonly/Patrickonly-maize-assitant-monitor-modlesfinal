@@ -1,0 +1,146 @@
+{
+  "greeting": {
+    "category": "Greeting",
+    "responses": [
+      "Welcome to the Maize Disease Monitoring AI Assistant!",
+      "Hello! I'm here to help you identify and manage maize diseases.",
+      "Hi! Ask me about disease identification, stages, or treatment options."
+    ]
+  },
+  "healthy_maize": {
+    "category": "Plant Health Status",
+    "description": "Maize plant with no disease symptoms",
+    "stages": [
+      "Healthy - Normal growth"
+    ],
+    "identification": "Leaves are uniformly green, firm, no spots or streaks",
+    "management": "Continue regular monitoring and good agronomic practices",
+    "yield_risk": "No yield loss expected"
+  },
+  "common_rust": {
+    "category": "Fungal Disease",
+    "description": "Orange-brown rust pustules on leaf surface",
+    "stages": [
+      "Early: Small (1-3mm) orange pustules on lower leaves",
+      "Moderate: Pustules grow (5-10mm), spread to mid-leaves",
+      "Severe: Large pustules (>10mm), extensive spread"
+    ],
+    "identification": "Orange pustules arranged in rows, easily rub off, yellow halo around pustules",
+    "cause": "Fungal disease spread by windborne spores",
+    "favorable_conditions": "Warm (20-25°C) and humid conditions",
+    "progression_time": "7-14 days per stage",
+    "management": [
+      "Apply fungicide every 10-14 days (Propiconazole, Mancozeb)",
+      "Remove heavily infected leaves",
+      "Improve air circulation"
+    ],
+    "yield_risk": "10-40% yield loss if untreated"
+  },
+  "gray_leaf_spot": {
+    "category": "Fungal Disease",
+    "description": "Rectangular gray lesions on leaf blade",
+    "stages": [
+      "Early: Small (2-3mm) rectangular gray lesions with brown borders",
+      "Moderate: Lesions enlarge (5-8mm), spread to mid-leaves",
+      "Severe: Large necrotic patches, leaf death, defoliation"
+    ],
+    "identification": "KEY: Rectangular lesion shape (not circular), gray center with reddish-brown border",
+    "cause": "Cercospora zeae-maydis fungus, spreads via rain splash and airborne spores",
+    "favorable_conditions": "Warm (20-28°C), humid, wet conditions",
+    "progression_time": "10-21 days per stage",
+    "management": [
+      "Start fungicide early (V6-V8 growth stage)",
+      "Apply every 10-14 days",
+      "Improve air circulation",
+      "Avoid overhead irrigation",
+      "Plant spacing for airflow"
+    ],
+    "yield_risk": "15-50% yield loss if untreated"
+  },
+  "leaf_blight": {
+    "category": "Fungal Disease",
+    "description": "Large irregular necrotic lesions with tissue death",
+    "stages": [
+      "Early: Water-soaked, elongated lesions with yellow halo",
+      "Moderate: Lesions enlarge, tissue dies (necrosis)",
+      "Severe: Extensive dead areas, leaf shredding"
+    ],
+    "identification": "Large (1-10cm) irregular lesions, initially water-soaked, black tissue in center",
+    "cause": "Northern corn leaf blight (Exserohilum turcicum)",
+    "favorable_conditions": "Cool (15-20°C), wet conditions",
+    "progression_time": "5-10 days per stage",
+    "management": [
+      "Use resistant hybrids (best option)",
+      "Apply fungicide at first sign",
+      "Rotate crops",
+      "Remove infected crop debris"
+    ],
+    "yield_risk": "20-60% yield loss if ear leaves affected"
+  },
+  "downy_mildew": {
+    "category": "Fungal Disease",
+    "description": "Yellow striping with fuzzy white growth on leaf undersurface",
+    "stages": [
+      "Early: Light yellow streaks, fuzzy whitish growth below",
+      "Moderate: Pronounced yellow/white stripes, dense sporulation",
+      "Severe: Severe yellowing, plant stunting, leaf death"
+    ],
+    "identification": "KEY: Yellow striping + WHITE FUZZY GROWTH on leaf underside",
+    "cause": "Peronosclerospora sorghi fungus",
+    "favorable_conditions": "Cool (18-22°C), wet, humid conditions",
+    "progression_time": "3-7 days if seedling infection (rapid)",
+    "management": [
+      "Use resistant varieties (prevention is key)",
+      "Apply metalaxyl-based fungicide early",
+      "Maintain proper plant spacing",
+      "Reduce leaf wetness"
+    ],
+    "yield_risk": "30-70% with early infection, 10-20% with late infection"
+  },
+  "maize_streak_virus": {
+    "category": "Viral Disease",
+    "description": "Yellow streaks running parallel to leaf veins",
+    "stages": [
+      "Early: Thin yellow streaks on emerging leaves",
+      "Moderate: Pronounced yellow/chlorotic streaks, stunting",
+      "Severe: Necrotic streaks, severe dwarfing, poor ears"
+    ],
+    "identification": "KEY: STREAKS parallel to veins (not random), systemic throughout plant",
+    "cause": "Maize streak virus (MSV) transmitted by leafhoppers",
+    "progression_time": "7-14 days per stage",
+    "management": [
+      "Control leafhopper vectors with insecticide",
+      "Remove infected plants immediately",
+      "Plant resistant varieties",
+      "Use trap crops"
+    ],
+    "yield_risk": "30-100% depending on infection timing"
+  },
+  "maize_lethal_necrosis": {
+    "category": "Viral Disease - CRITICAL",
+    "description": "Rapid necrosis and plant death syndrome",
+    "stages": [
+      "Early: Chlorotic streaks, initial necrosis",
+      "Moderate: Rapid progression, extensive necrosis",
+      "Critical: Complete leaf death, plant drying, plant death"
+    ],
+    "identification": "KEY: RAPID progression (3-5 days), affects young and old leaves, plant drying rapidly",
+    "cause": "Combination of viruses (SCMV + MNSV or MMV)",
+    "progression_time": "3-5 days from Stage 1 to Stage 2, then 2-3 days to death",
+    "management": [
+      "IMMEDIATE: Isolate and remove infected plants",
+      "Control insect vectors",
+      "Monitor neighboring crops closely",
+      "Use resistant varieties if available",
+      "Consult extension officer"
+    ],
+    "yield_risk": "Catastrophic: 70-100% yield loss"
+  },
+  "asking": {
+    "category": "General Questions",
+    "responses": [
+      "I can help you with: disease identification, disease stages, management strategies, and treatment recommendations.",
+      "Ask me about any maize disease and I'll provide detailed information on identification, progression, and management."
+    ]
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "advice": [
+    "Remove infected leaves and use proper treatment.",
+    "Remove infected leaves early, apply the appropriate fungicide or treatment, and monitor progression regularly to confirm the disease is not advancing further.",
+    "Yes! Recovery depends on the disease stage. Early-stage diseases respond well to treatment. Monitoring progression helps you act before it reaches a critical stage.",
+    "Yes, early detection improves recovery chances."
+  ],
+  "agriculture": [
+    "Common pests include fall armyworm and stem borers.",
+    "Depends on soil type; soil testing is recommended.",
+    "Ensure spacing, fertilizer, and pest control.",
+    "Prepare soil, plant seeds, and manage pests.",
+    "Regular monitoring ensures healthy maize growth.",
+    "Use proper fertilizer, watering, and pest control.",
+    "Well-drained fertile loam soil is best."
+  ],
+  "capabilities": [
+    "I can detect maize diseases, monitor disease progression over time from early to advanced stages, and provide treatment advice to protect your harvest.",
+    "I can identify whether your maize is diseased, name the disease, track how it progresses over time, and recommend the best course of action.",
+    "I detect maize diseases, track crop health, and give farming advice."
+  ],
+  "command": [
+    "Please upload a maize image for analysis.",
+    "Please upload a maize leaf image. I will detect the disease and analyze its progression stage for you.",
+    "Starting maize disease analysis. Provide an image and I will detect the disease and monitor its current stage of progression.",
+    "Starting maize disease detection. Upload image."
+  ],
+  "date_question": [
+    "I do not have a live clock, but I am always available to help you monitor maize diseases regardless of the date or season.",
+    "I do not have access to real-time data, but you can check today's date on your device. I am here to assist you with maize health anytime!",
+    "The best time to detect maize diseases is during early vegetative stages. Regular checks from planting through silking help you catch and monitor progression before it causes major damage.",
+    "You should check your maize crops at least once a week. During wet or humid seasons, increase monitoring to every 2-3 days to catch disease progression early."
+  ],
+  "disease_info": [
+    "Blight is a fungal disease causing leaf lesions.",
+    "Common Rust is caused by Puccinia sorghi and appears as reddish powdery pustules on leaves. Tracking its spread over time is critical to prevent severe yield loss.",
+    "Gray Leaf Spot is a fungal disease affecting leaves.",
+    "Gray Leaf Spot is a fungal disease caused by Cercospora zeae-maydis. It produces rectangular gray or tan lesions on leaves and can worsen rapidly if not monitored early.",
+    "Leaf Blight is a fungal disease causing cigar-shaped lesions and leaf drying. Early detection and monitoring progression prevents it from spreading to the whole plant.",
+    "Maize Lethal Necrosis (MLN) is a serious viral disease that causes rapid plant death. Monitoring its progression is essential as it can devastate an entire field quickly.",
+    "Maize Lethal Necrosis is a severe viral disease.",
+    "Maize Streak Virus (MSV) causes yellow streaks on leaves and stunts growth. It progresses in stages, so regular monitoring helps determine the severity level.",
+    "Maize Streak Virus causes yellow streak patterns.",
+    "Rust causes reddish-orange spots on maize leaves."
+  ],
+  "education": [
+    "AI is artificial intelligence that enables machines to learn from data.",
+    "Agriculture is farming crops and raising animals."
+  ],
+  "goodbye": [
+    "Good night! Monitor your crops regularly.",
+    "Goodbye! Take care of your maize crops.",
+    "Goodbye! Take good care of your crops and return anytime you notice changes in plant health.",
+    "See you! I am always here to help with maize disease detection and monitoring. Happy farming!",
+    "See you! I am always here to help."
+  ],
+  "gratitude": [
+    "Happy to help! Remember to monitor your crops regularly for any disease progression.",
+    "You are welcome! Come back anytime you need help monitoring your maize crops.",
+    "You are welcome! I am here to help.",
+    "You're welcome! Happy farming."
+  ],
+  "greeting": [
+    "Good afternoon! I am here to help you detect and monitor maize diseases. How can I assist?",
+    "Good afternoon! I am here to help you with maize health.",
+    "Good afternoon! I am your maize disease assistant.",
+    "Good evening! Ask me anything about maize diseases.",
+    "Good evening! Ask me anything about maize health and disease progression.",
+    "Good evening! I am ready to support your maize farming.",
+    "Good morning! How can I assist you with your maize crops today?",
+    "Good morning! I am Maize Assistant. Let us keep your maize crops healthy today.",
+    "Good morning! I can help you detect maize diseases.",
+    "Greetings! I am Maize Assistant. Feel free to ask about maize diseases or crop care.",
+    "Hello! I am Maize Assistant, developed by YUMVAGUSENGA PATRICK. How can I help with your maize crops today?",
+    "Hello! I am your Maize Assistant. How can I help you today?",
+    "Hello! Maize Assistant here to help you.",
+    "Hey there! I am your Maize Assistant ready to help.",
+    "Hey there! Maize Assistant is ready to help you. What do you need?",
+    "Hi! I am Maize Assistant. Ask me anything about maize diseases or crop health.",
+    "Hi! I am your Maize Assistant. Ask me anything about maize or farming.",
+    "Howdy! I am Maize Assistant. How can I support your farming today?"
+  ],
+  "help": [
+    "I can help you detect maize diseases and monitor crop health.",
+    "I can help you detect maize diseases and monitor their progression. Describe your symptoms or upload an image to get started."
+  ],
+  "identity": [
+    "I am Maize Assistant developed by YUMVAGUSENGA PATRICK, student in RP, registration number 25RP19154.",
+    "I am Maize Assistant — an AI system developed by YUMVAGUSENGA PATRICK, a student at RP with registration number 25RP19154. I help detect and monitor maize diseases.",
+    "I am Maize Assistant, an AI system for maize disease detection.",
+    "I am an AI Maize Assistant, not a human.",
+    "I am an AI system, not a physical robot. I was created by YUMVAGUSENGA PATRICK (Reg: 25RP19154) at RP to detect and track maize diseases.",
+    "I process data and images to help detect maize diseases.",
+    "I was developed by YUMVAGUSENGA PATRICK (Reg: 25RP19154) at RP as an AI tool for maize disease detection and progression monitoring.",
+    "I was developed by YUMVAGUSENGA PATRICK, RP student, reg no 25RP19154.",
+    "I was developed by YUMVAGUSENGA PATRICK, a student at RP with registration number 25RP19154, to help farmers detect and track maize diseases over time.",
+    "My creator is YUMVAGUSENGA PATRICK, student at RP (Reg: 25RP19154). I was built to detect maize diseases and monitor how they progress over time.",
+    "My name is Maize Assistant. I was developed by YUMVAGUSENGA PATRICK (Reg: 25RP19154) at RP to support maize disease detection and progression monitoring.",
+    "No, I am an AI Maize Assistant developed by YUMVAGUSENGA PATRICK (Reg: 25RP19154) at RP to help farmers monitor maize crop health.",
+    "Yes! I am a real AI system called Maize Assistant, developed by YUMVAGUSENGA PATRICK (Reg: 25RP19154) at RP for maize disease monitoring.",
+    "Yes, I am a real AI system designed for maize disease detection."
+  ],
+  "maize_question": [
+    "I can detect Blight, Rust, Gray Leaf Spot, MLN, and MSV.",
+    "I can identify diseases like Blight, Common Rust, Gray Leaf Spot, MLN, and MSV, and tell you whether they are in early, moderate, or severe stage.",
+    "Upload a maize leaf image and I will determine if it is healthy or flag the disease along with its current progression stage.",
+    "Upload an image and I will analyze maize health.",
+    "Upload an image and I will check if your maize is healthy or diseased.",
+    "Upload an image and I will detect whether your maize is diseased and determine how far the disease has progressed."
+  ],
+  "maize_symptom": [
+    "Brown leaves may indicate Leaf Blight at an early or advanced stage. Please share an image so I can assess the progression level.",
+    "Brown leaves may indicate fungal infection like Blight.",
+    "Leaf damage may be caused by pests or disease.",
+    "Spots may indicate Gray Leaf Spot or Common Rust. Upload an image so I can detect the disease and assess what stage of progression it is at.",
+    "Spots may indicate fungal or viral infection.",
+    "Yellowing can signal Maize Streak Virus or nutrient deficiency. Early identification helps track whether the condition is worsening or stable.",
+    "Yellowing may indicate disease or nutrient deficiency."
+  ],
+  "monitoring": [
+    "Diseases progress gradually and can be tracked visually.",
+    "Early detection helps stop disease progression.",
+    "Frequent image uploads help track disease development.",
+    "I analyze maize health trends across multiple images.",
+    "I can compare images over time to detect disease spread.",
+    "I can track maize disease progression over time using images.",
+    "I compare images to detect improvement or worsening.",
+    "I estimate infection severity and track changes.",
+    "I monitor changes in maize health over multiple scans.",
+    "Upload weekly images to track maize health changes."
+  ],
+  "progression": [
+    "Blight can spread rapidly under humid conditions. Monitoring its progression every few days helps you decide when to apply treatment or remove affected plants.",
+    "Disease progression refers to how a maize disease develops over time from early infection to advanced damage. Monitoring this helps you intervene at the right time to save your crops.",
+    "Disease stages range from early (minor lesions) to moderate (spreading) to severe (heavy damage). Share an image and I will assess which stage your crop is currently at.",
+    "I can assess this by comparing observations over time. Share updated images regularly and I will track whether the disease is progressing or being controlled.",
+    "Take regular observations or images of the same plant over time. I will analyze each stage and tell you if the disease is early, moderate, or severe and whether it is spreading.",
+    "Tracking disease progression lets you know if treatment is working or if the disease is worsening. It moves beyond simple detection to help you make informed, timely farming decisions."
+  ],
+  "smalltalk": [
+    "All good here! I am Maize Assistant. What can I help you with today?",
+    "I am doing well as your Maize Assistant. How can I help?",
+    "I am functioning well and ready to assist you with maize disease detection and monitoring!",
+    "Nice to meet you too! I am Maize Assistant. Ask me anything about maize health."
+  ],
+  "uncertainty": [
+    "I will analyze severity from the image."
+  ]
+}

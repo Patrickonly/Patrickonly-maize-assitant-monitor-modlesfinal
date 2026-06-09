@@ -1,0 +1,27 @@
+{
+  "model_name": "maizediseaseprogression",
+  "timestamp": "2026-05-13T14:23:55.168616",
+  "architecture": "EfficientNetB0",
+  "input_shape": [
+    224,
+    224,
+    3
+  ],
+  "num_classes": 7,
+  "classes": [
+    "Common_Rust_disease",
+    "Downy_Mildew_disease",
+    "Gray_Leaf_Spot_disease",
+    "Healthy_maize",
+    "Leaf_Blight_disease",
+    "Maize_Lethal_Necrosis_disease",
+    "Maize_Streak_Virus_disease"
+  ],
+  "features": [
+    "Disease classification",
+    "Severity assessment",
+    "Progression tracking",
+    "Confidence scoring"
+  ],
+  "training_notes": "Final single-model export from Maize_Disease_Progression_Monitoring_AI notebook"
+}

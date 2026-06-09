@@ -1,0 +1,167 @@
+{
+  "healthy_maize": {
+    "category": "Plant Health Status",
+    "stage": "Healthy",
+    "description": "Leaf looks green and clean with no clear disease marks.",
+    "stages": [
+      "Healthy: Normal growth and healthy leaf appearance"
+    ],
+    "cause": "Good field hygiene, balanced feeding, favorable weather, and proper crop care",
+    "favorable_conditions": "Healthy crop management and low disease pressure",
+    "progression_time": "N/A",
+    "management": [
+      "Continue normal field monitoring every week",
+      "Keep balanced fertilizer and regular watering schedule"
+    ],
+    "prevention": [
+      "Use clean seed and resistant varieties",
+      "Maintain spacing for airflow and reduce leaf wetness"
+    ],
+    "urgency": "Low",
+    "yield_risk": "No yield loss expected"
+  },
+  "common_rust": {
+    "category": "Fungal Disease",
+    "stage": "Early Stage",
+    "description": "Leaf has orange-brown rust pustules, often scattered in rows.",
+    "stages": [
+      "Early: Small orange-brown pustules appear on lower leaves",
+      "Moderate: Pustules spread to mid-leaves",
+      "Severe: Extensive pustules and fast spread across the plant"
+    ],
+    "cause": "Rust fungus favored by humidity and moderate temperatures",
+    "favorable_conditions": "Warm, humid conditions with wind-borne spores",
+    "progression_time": "7-14 days per stage",
+    "management": [
+      "Start fungicide spray early",
+      "Monitor nearby plants for fast spread",
+      "Remove badly infected leaves if practical"
+    ],
+    "prevention": [
+      "Use resistant varieties",
+      "Keep field clean and reduce volunteer maize plants"
+    ],
+    "urgency": "Medium",
+    "yield_risk": "10-40% yield loss if untreated"
+  },
+  "gray_leaf_spot": {
+    "category": "Fungal Disease",
+    "stage": "Moderate Stage",
+    "description": "Leaf has gray rectangular spots that may join and spread quickly.",
+    "stages": [
+      "Early: Small rectangular gray lesions appear on lower leaves",
+      "Moderate: Lesions enlarge and spread to mid-leaves",
+      "Severe: Large necrotic patches and defoliation begin"
+    ],
+    "cause": "Fungal infection in prolonged moisture conditions",
+    "favorable_conditions": "Warm, humid, wet conditions with dense canopy",
+    "progression_time": "10-21 days per stage",
+    "management": [
+      "Apply fungicide and follow label timing",
+      "Reduce field humidity by improving spacing",
+      "Remove heavily damaged leaves where possible"
+    ],
+    "prevention": [
+      "Rotate crops and manage infected residues",
+      "Use certified seed and resistant hybrids"
+    ],
+    "urgency": "High",
+    "yield_risk": "15-50% yield loss if untreated"
+  },
+  "leaf_blight": {
+    "category": "Fungal Disease",
+    "stage": "Early Stage",
+    "description": "Leaf shows long brown lesions that can expand along the blade.",
+    "stages": [
+      "Early: Water-soaked, elongated lesions with yellow halo",
+      "Moderate: Lesions enlarge and tissue begins to die",
+      "Severe: Extensive dead areas and leaf shredding"
+    ],
+    "cause": "Fungal infection in cool, wet conditions",
+    "favorable_conditions": "Cool, wet weather with poor airflow",
+    "progression_time": "5-10 days per stage",
+    "management": [
+      "Remove heavily affected leaves where possible",
+      "Apply recommended fungicide quickly",
+      "Improve spacing and avoid overhead irrigation"
+    ],
+    "prevention": [
+      "Rotate crops and destroy infected residues",
+      "Plant resistant maize varieties"
+    ],
+    "urgency": "Medium",
+    "yield_risk": "20-60% yield loss if ear leaves affected"
+  },
+  "downy_mildew": {
+    "category": "Fungal Disease",
+    "stage": "Moderate Stage",
+    "description": "Leaf shows yellow streaking and unhealthy pale areas, with weak growth.",
+    "stages": [
+      "Early: Light yellow streaks and fuzzy growth below",
+      "Moderate: Pronounced yellow and white streaks become visible",
+      "Severe: Severe yellowing, stunting, and leaf death"
+    ],
+    "cause": "Pathogen pressure in wet, cool-to-warm conditions",
+    "favorable_conditions": "Wet, humid conditions and infected seed",
+    "progression_time": "3-7 days if seedling infection",
+    "management": [
+      "Rogue highly infected plants",
+      "Use suitable disease management treatment quickly",
+      "Keep field drains clear to reduce moisture buildup"
+    ],
+    "prevention": [
+      "Use resistant seed and treated seed sources",
+      "Avoid continuous maize monocropping"
+    ],
+    "urgency": "High",
+    "yield_risk": "30-70% with early infection, 10-20% with late infection"
+  },
+  "maize_streak_virus": {
+    "category": "Viral Disease",
+    "stage": "Moderate Stage",
+    "description": "Leaf shows streak-like yellow lines and reduced leaf vigor.",
+    "stages": [
+      "Early: Thin yellow streaks appear on emerging leaves",
+      "Moderate: Pronounced yellow streaks and stunting",
+      "Severe: Necrotic streaks, severe dwarfing, and poor ears"
+    ],
+    "cause": "Viral infection spread by leafhopper insects",
+    "favorable_conditions": "High vector pressure in nearby fields",
+    "progression_time": "7-14 days per stage",
+    "management": [
+      "Remove heavily infected plants early",
+      "Control leafhopper vectors quickly",
+      "Replant with resistant varieties if outbreak is severe"
+    ],
+    "prevention": [
+      "Use virus-resistant hybrids",
+      "Early vector management and field hygiene"
+    ],
+    "urgency": "High",
+    "yield_risk": "30-100% depending on infection timing"
+  },
+  "maize_lethal_necrosis": {
+    "category": "Viral Disease - CRITICAL",
+    "stage": "Severe Stage",
+    "description": "Leaf shows severe drying/necrosis patterns and strong plant stress.",
+    "stages": [
+      "Early: Chlorotic streaks and initial necrosis",
+      "Moderate: Rapid progression with extensive necrosis",
+      "Critical: Complete leaf death, plant drying, and plant death"
+    ],
+    "cause": "Combined viral infection pressure",
+    "favorable_conditions": "Insect vectors and infected crop material",
+    "progression_time": "3-5 days from Stage 1 to Stage 2, then 2-3 days to death",
+    "management": [
+      "Remove and isolate heavily infected plants immediately",
+      "Control insect vectors urgently",
+      "Consult local extension officer without delay"
+    ],
+    "prevention": [
+      "Plant resistant varieties and use clean seed",
+      "Control vectors and maintain strict field sanitation"
+    ],
+    "urgency": "Critical Risk",
+    "yield_risk": "Catastrophic: 70-100% yield loss"
+  }
+}
