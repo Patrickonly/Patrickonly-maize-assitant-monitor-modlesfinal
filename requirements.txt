@@ -7,7 +7,7 @@ scikit-learn
 pillow
 jupyter
 flask
-opencv-python
+opencv-python-headless
 ultralytics
 
 gunicorn
