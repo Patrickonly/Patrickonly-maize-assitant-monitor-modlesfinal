@@ -100,12 +100,6 @@ loaded_intent_labels_path = None
 loaded_keras_model_path = None
 loaded_yolo_model_path = None
 
-YOLO_MODEL_PATHS = [
-    'yolov8n.pt',
-]
-
-yolo_model = None
-
 
 def normalize_disease_name(label_name):
     mapping = {
@@ -320,50 +314,6 @@ def is_likely_maize_leaf(image_path):
 
     return green_ratio >= 0.10 and edge_ratio >= 0.01
 
-
-def validate_maize_image_with_yolo(image_path):
-    y_model = get_yolo_model()
-    if y_model is None:
-        return {
-            'valid': False,
-            'detected_objects': ['Validation model unavailable'],
-        }
-
-    try:
-        results = y_model.predict(source=image_path, conf=0.25, verbose=False)
-        detected_objects = []
-        for result in results:
-            if result.boxes is None:
-                continue
-            for cls_idx in result.boxes.cls.tolist():
-                obj_name = result.names.get(int(cls_idx), f'class_{int(cls_idx)}')
-                if obj_name not in detected_objects:
-                    detected_objects.append(obj_name)
-
-        # Strict rule requested: if YOLO detects any known object, reject.
-        if len(detected_objects) > 0:
-            return {
-                'valid': False,
-                'detected_objects': detected_objects,
-            }
-
-        # If YOLO detects nothing, still ensure image looks like a clear maize leaf.
-        if not is_likely_maize_leaf(image_path):
-            return {
-                'valid': False,
-                'detected_objects': ['No clear maize leaf structure'],
-            }
-
-        return {
-            'valid': True,
-            'detected_objects': [],
-        }
-    except Exception:
-        return {
-            'valid': False,
-            'detected_objects': ['Validation failed'],
-        }
-
 def build_farmer_image_report(label_name, confidence):
     pretty_name = label_name.replace('_', ' ').replace('disease', 'disease').strip()
     _, entry = get_disease_entry(label_name)
@@ -494,21 +444,6 @@ def get_keras_model():
         except Exception as e:
             print("Keras load error:", e)
     return keras_model
-
-def get_yolo_model():
-    global yolo_model, loaded_yolo_model_path
-    if yolo_model is None:
-        try:
-            from ultralytics import YOLO
-            for model_path in YOLO_MODEL_PATHS:
-                if os.path.exists(model_path):
-                    yolo_model = YOLO(model_path)
-                    loaded_yolo_model_path = model_path
-                    print(f'Loaded YOLO validation model: {model_path}')
-                    break
-        except Exception as e:
-            print("YOLO load error:", e)
-    return yolo_model
 
 
 @app.route('/')
