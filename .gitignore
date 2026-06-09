@@ -24,3 +24,7 @@ __pycache__/
 # DO NOT ignore keras and joblib files
 !*.keras
 !*.joblib
+
+# Ignore large files that are not needed
+*.csv
+*.ipynb
