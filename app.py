@@ -586,7 +586,7 @@ def api_predict():
             k_model = get_keras_model()
             if k_model is not None:
                 try:
-                    from tensorflow.keras.preprocessing import image
+                    from tensorflow.keras.utils import load_img, img_to_array
                     import numpy as np
 
                     # Load and preprocess image
@@ -597,8 +597,8 @@ def api_predict():
                     
                     print(f"  Target size: {target_size}")
                     
-                    img = image.load_img(save_path, target_size=target_size)
-                    x = image.img_to_array(img)
+                    img = load_img(save_path, target_size=target_size)
+                    x = img_to_array(img)
                     x = np.expand_dims(x, axis=0)
                     x = x / 255.0
                     
@@ -679,7 +679,7 @@ def api_predict():
             if k_model is None:
                 return api_response(False, status=503, error='No image classification model available on server')
 
-            from tensorflow.keras.preprocessing import image
+            from tensorflow.keras.utils import load_img, img_to_array
             import numpy as np
 
             if keras_input_shape:
@@ -687,8 +687,8 @@ def api_predict():
             else:
                 target_size = (224, 224)
 
-            img = image.load_img(save_path, target_size=target_size)
-            x = image.img_to_array(img)
+            img = load_img(save_path, target_size=target_size)
+            x = img_to_array(img)
             x = np.expand_dims(x, axis=0)
             x = x / 255.0
 
