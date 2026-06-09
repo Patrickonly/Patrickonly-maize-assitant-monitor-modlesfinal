@@ -9,3 +9,7 @@ jupyter
 flask
 opencv-python
 ultralytics
+
+gunicorn
+joblib
+python-dotenv
