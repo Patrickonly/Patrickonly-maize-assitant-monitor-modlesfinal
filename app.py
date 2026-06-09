@@ -98,7 +98,6 @@ loaded_joblib_model_path = None
 loaded_response_map_path = None
 loaded_intent_labels_path = None
 loaded_keras_model_path = None
-loaded_yolo_model_path = None
 
 
 def normalize_disease_name(label_name):
@@ -474,7 +473,6 @@ def api_model_info():
         response_map=loaded_response_map_path,
         intent_labels=loaded_intent_labels_path,
         image_model=loaded_keras_model_path,
-        validation_model=loaded_yolo_model_path,
         image_input_shape=keras_input_shape,
         image_classes=len(labels_list),
         text_intents=len(intent_labels),
@@ -575,7 +573,6 @@ def api_predict():
                         answer=report,
                         report=report,
                         model_path=loaded_keras_model_path,
-                        validation_model_path=loaded_yolo_model_path,
                         file_name=filename,
                     )
                 except Exception as e:
@@ -652,7 +649,6 @@ def api_predict():
                 answer=report,
                 report=report,
                 model_path=loaded_keras_model_path,
-                validation_model_path=loaded_yolo_model_path,
                 file_name=filename,
             )
         except Exception as e:
