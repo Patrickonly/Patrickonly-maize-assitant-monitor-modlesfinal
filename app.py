@@ -458,6 +458,16 @@ else:
     ]
     print(f'Using default disease labels ({len(labels_list)} classes)')
 
+keras_model = None
+keras_input_shape = None
+KERAS_MODEL_PATHS = [
+    'maizediseaseprogression.keras',
+    'modelmaize_detection_v1.0.keras',
+    'modelmaize_detection_v1.keras',
+    'modelmaize_detection.keras',
+    'modelmaize_detection.h5',
+]
+
 def get_joblib_model():
     global joblib_model, loaded_joblib_model_path
     if joblib_model is None:
