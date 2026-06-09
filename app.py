@@ -569,10 +569,10 @@ def api_predict():
             print(f"  Labels loaded: {len(labels_list)} classes")
             print(f"  Model available: {get_keras_model() is not None}")
 
-            # Stage 1: YOLOv8 image validation gate
-            validation = validate_maize_image_with_yolo(save_path)
-            if not validation['valid']:
-                invalid_report = build_invalid_image_report(validation['detected_objects'])
+            # Stage 1: Lightweight OpenCV image validation gate (replaces heavy YOLO to save RAM)
+            is_valid = is_likely_maize_leaf(save_path)
+            if not is_valid:
+                invalid_report = build_invalid_image_report(['No clear maize leaf structure'])
                 return api_response(
                     False,
                     status=400,
@@ -660,9 +660,9 @@ def api_predict():
             print(f"  Labels loaded: {len(labels_list)} classes")
             print(f"  Model available: {get_keras_model() is not None}")
 
-            validation = validate_maize_image_with_yolo(save_path)
-            if not validation['valid']:
-                invalid_report = build_invalid_image_report(validation['detected_objects'])
+            is_valid = is_likely_maize_leaf(save_path)
+            if not is_valid:
+                invalid_report = build_invalid_image_report(['No clear maize leaf structure'])
                 return api_response(
                     False,
                     status=400,

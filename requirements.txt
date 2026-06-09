@@ -8,7 +8,6 @@ pillow
 jupyter
 flask
 opencv-python-headless
-ultralytics
 
 gunicorn
 joblib
