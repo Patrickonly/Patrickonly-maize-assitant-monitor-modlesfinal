@@ -69,10 +69,7 @@ def allowed_file(filename):
 # Try loading a joblib text model and response maps (with version support)
 # Try versioned files first (_v1.0, _v1, etc.), then fall back to legacy names
 JOBLIB_MODEL_PATHS = [
-    'askinggreetingmodel.joblib',
-    'askingmodelmaize_v1.0.joblib',
-    'askingmodelmaize_v1.joblib',
-    'askingmodelmaize.joblib'
+    'askinggreetingmodel.joblib'
 ]
 RESPONSE_MAP_PATHS = [
     'askinggreetingmodel_response_map.json',
@@ -461,11 +458,7 @@ else:
 keras_model = None
 keras_input_shape = None
 KERAS_MODEL_PATHS = [
-    'maizediseaseprogression.keras',
-    'modelmaize_detection_v1.0.keras',
-    'modelmaize_detection_v1.keras',
-    'modelmaize_detection.keras',
-    'modelmaize_detection.h5',
+    'maizediseaseprogression.keras'
 ]
 
 def get_joblib_model():
