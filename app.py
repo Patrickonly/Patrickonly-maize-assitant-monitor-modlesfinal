@@ -1,25 +1,22 @@
 """
 Maize Disease Progression API
 ─────────────────────────────
-Optimised for fast cold-start on Render free tier.
+Optimised for Render free tier deployment.
 
 Key design decisions:
-  • All heavy models are loaded ONCE at import time (eager loading).
-  • A /api/warmup endpoint lets the platform ping the app after deploy
-    so the first real user request is instant.
-  • Gunicorn timeout is raised to 300 s to survive slow cold starts.
-  • Images are resized before inference to reduce CPU work.
-  • Two-stage pipeline: YOLOv8 (maize vs non-maize) → Keras (disease).
-  • Environment variables set BEFORE importing heavy libraries to suppress
-    warnings, font cache builds, and config directory issues on Render.
+  • Models load LAZILY on first request (not at import time) so gunicorn
+    can bind the port immediately and pass Render's port scan.
+  • After first load, models are cached globally for instant subsequent requests.
+  • Two-stage pipeline: YOLOv8 (maize vs non-maize) -> Keras (disease).
+  • Environment variables set BEFORE any heavy imports.
 """
 
 # ─── CRITICAL: Set environment variables BEFORE any heavy imports ──────────────
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["YOLO_CONFIG_DIR"] = "/tmp/Ultralytics"
-os.environ["MPLBACKEND"] = "Agg"  # Prevent matplotlib font cache issues
-os.environ["OMP_NUM_THREADS"] = "1"  # Limit CPU threads for free tier
+os.environ["MPLBACKEND"] = "Agg"
+os.environ["OMP_NUM_THREADS"] = "1"
 
 import base64
 import json
@@ -47,7 +44,6 @@ API_VERSION = "v1"
 FRONTEND_ORIGINS = [
     o.strip() for o in os.getenv("FRONTEND_ORIGINS", "*").split(",") if o.strip()
 ]
-
 
 # ─── CORS ──────────────────────────────────────────────────────────────────────
 @app.after_request
@@ -104,12 +100,14 @@ INTENT_LABELS_PATHS = [
 ]
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# EAGER MODEL LOADING  (runs once at import time)
+# LAZY-LOADED MODEL STATE  (loaded on first request, cached thereafter)
 # ═══════════════════════════════════════════════════════════════════════════════
 yolo_model = None
 keras_model = None
 keras_input_shape = None
 joblib_model = None
+_models_loaded = False
+
 response_map = {}
 intent_labels = []
 labels_list = []
@@ -223,12 +221,21 @@ def _load_json_artefacts():
         print(f"[DATA] Using default disease labels ({len(labels_list)} classes)", flush=True)
 
 
-# ─── Load everything at import time ────────────────────────────────────────────
-_load_yolo()
-_load_keras()
-_load_joblib()
+def _ensure_models_loaded():
+    """Load all models once on first request. Safe to call multiple times."""
+    global _models_loaded
+    if _models_loaded:
+        return
+    print("[STARTUP] Loading models on first request...", flush=True)
+    _load_yolo()
+    _load_keras()
+    _load_joblib()
+    _models_loaded = True
+    print("[STARTUP] All models loaded.", flush=True)
+
+
+# ─── Load JSON artefacts at import time (fast, no heavy deps) ─────────────────
 _load_json_artefacts()
-print("[STARTUP] All models and data loaded.", flush=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -377,7 +384,6 @@ def classify_maize(image_path):
     """Stage 1: YOLOv8 - returns (is_maize, class_name, confidence)."""
     global yolo_model
     if yolo_model is None:
-        print("[YOLO] Model not loaded, attempting reload...", flush=True)
         _load_yolo()
     if yolo_model is None:
         raise RuntimeError("YOLO model not available")
@@ -402,7 +408,6 @@ def classify_disease(image_path):
     """Stage 2: Keras - returns (label_name, condition_name, confidence)."""
     global keras_model
     if keras_model is None:
-        print("[KERAS] Model not loaded, attempting reload...", flush=True)
         _load_keras()
     if keras_model is None:
         raise RuntimeError("Keras model not available")
@@ -426,6 +431,7 @@ def classify_disease(image_path):
 
 def handle_image_prediction(save_path, filename, input_source):
     """Full two-stage pipeline."""
+    _ensure_models_loaded()
     print(f"\n[PREDICT] {filename}  source={input_source}", flush=True)
 
     # Stage 1: YOLO maize / non-maize
@@ -493,13 +499,11 @@ def api_health():
 
 @app.route("/api/warmup", methods=["GET"])
 def api_warmup():
-    """Warmup endpoint - call after deploy to ensure models are loaded."""
-    global yolo_model, keras_model
-    # Force reload if somehow None
-    if yolo_model is None:
-        _load_yolo()
-    if keras_model is None:
-        _load_keras()
+    """
+    Warmup endpoint - call after deploy to load models before real users hit the app.
+    Render / uptime monitors can ping this to pre-load models.
+    """
+    _ensure_models_loaded()
     return api_response(
         True, status="warm",
         yolo_loaded=yolo_model is not None,
@@ -513,6 +517,7 @@ def api_warmup():
 
 @app.route("/api/model-info", methods=["GET"])
 def api_model_info():
+    _ensure_models_loaded()
     return api_response(
         True,
         yolo_model=loaded_yolo_path,
@@ -554,6 +559,7 @@ def api_predict():
     # Text question
     question = (payload.get("question") or payload.get("message") or request.form.get("question") or "").strip()
     if question:
+        _ensure_models_loaded()
         response_text = "Sorry, I don't have an answer for that yet."
         label = None
         print(f"\n[TEXT] {question}", flush=True)
