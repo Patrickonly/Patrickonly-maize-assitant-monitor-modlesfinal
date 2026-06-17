@@ -59,6 +59,35 @@ def add_cors_headers(response):
     return response
 
 
+# ─── Global error handlers — always return valid JSON ─────────────────────────
+@app.errorhandler(400)
+def bad_request(e):
+    return api_response(False, status=400, error=str(e.description) if hasattr(e, 'description') else 'Bad request')
+
+@app.errorhandler(404)
+def not_found(e):
+    return api_response(False, status=404, error='Not found')
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return api_response(False, status=405, error='Method not allowed')
+
+@app.errorhandler(413)
+def payload_too_large(e):
+    return api_response(False, status=413, error='File too large (max 16 MB)')
+
+@app.errorhandler(500)
+def internal_error(e):
+    return api_response(False, status=500, error='Internal server error')
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    import traceback
+    print(f"[ERROR] Unhandled exception: {e}", flush=True)
+    traceback.print_exc()
+    return api_response(False, status=500, error='Server error — please try again')
+
+
 def api_response(ok, status=200, **payload):
     data = {
         "ok": ok,
@@ -225,13 +254,18 @@ def _ensure_models_loaded():
     """Load all models once on first request. Safe to call multiple times."""
     global _models_loaded
     if _models_loaded:
-        return
+        return True
     print("[STARTUP] Loading models on first request...", flush=True)
-    _load_yolo()
-    _load_keras()
-    _load_joblib()
-    _models_loaded = True
-    print("[STARTUP] All models loaded.", flush=True)
+    try:
+        _load_yolo()
+        _load_keras()
+        _load_joblib()
+        _models_loaded = True
+        print("[STARTUP] All models loaded.", flush=True)
+        return True
+    except Exception as e:
+        print(f"[STARTUP] Model loading failed: {e}", flush=True)
+        return False
 
 
 # ─── Load JSON artefacts at import time (fast, no heavy deps) ─────────────────
@@ -431,7 +465,8 @@ def classify_disease(image_path):
 
 def handle_image_prediction(save_path, filename, input_source):
     """Full two-stage pipeline."""
-    _ensure_models_loaded()
+    if not _ensure_models_loaded():
+        return api_response(False, status=503, error='Models are still loading. Please wait a moment and try again.')
     print(f"\n[PREDICT] {filename}  source={input_source}", flush=True)
 
     # Stage 1: YOLO maize / non-maize

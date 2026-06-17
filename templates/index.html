@@ -755,12 +755,33 @@
       setLoading(true, 'Hold on — generating your answer…');
 
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 min timeout
+
         const response = await fetch('/api/predict', {
           method: 'POST',
-          body: formData
+          body: formData,
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
-        const data = await response.json();
+        // Handle empty or non-JSON responses
+        const text = await response.text();
+        if (!text || !text.trim()) {
+          setLoading(false);
+          showError('Server returned empty response. The model may still be loading — please try again in a moment.');
+          return;
+        }
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (parseErr) {
+          setLoading(false);
+          showError('Server returned an invalid response. Please try again.');
+          return;
+        }
+
         setLoading(false);
 
         if (!data.ok) {
@@ -772,6 +793,14 @@
                 ⚠️ ${escapeHtml(data.error || 'Not a maize image.')}
               </div>
               <div>${escapeHtml((data.answer || data.report || '').replace(/^⚠️.*\n\n/, ''))}</div>
+            `);
+          } else if (data.error && data.error.includes('still loading')) {
+            // Model still loading — show friendly message
+            appendMessage('assistant', `
+              <div style="font-weight:800; margin-bottom:6px;">Assistant</div>
+              <div style="background:#fffbeb; border:1px solid #fde68a; color:#92400e; padding:14px 18px; border-radius:12px;">
+                ⏳ ${escapeHtml(data.error || 'Models are loading. Please wait...')}
+              </div>
             `);
           } else {
             showError(data.error || 'Something went wrong.');
@@ -789,13 +818,20 @@
         clearAttachment();
       } catch (error) {
         setLoading(false);
-        showError('Network error: ' + error.message);
+        if (error.name === 'AbortError') {
+          showError('Request timed out. The server may be busy loading models. Please try again.');
+        } else {
+          showError('Network error: ' + error.message);
+        }
       } finally {
         if (isGenerating) {
           setLoading(false);
         }
       }
     }
+
+    // Warm up models on page load so first prediction is faster
+    fetch('/api/warmup', { method: 'GET' }).catch(() => {});
   </script>
 </body>
 </html>
