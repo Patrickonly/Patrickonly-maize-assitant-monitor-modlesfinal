@@ -8,6 +8,7 @@ pillow
 jupyter
 flask
 opencv-python-headless
+ultralytics>=8.3.0
 
 gunicorn
 joblib
