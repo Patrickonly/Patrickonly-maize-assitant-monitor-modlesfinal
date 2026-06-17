@@ -10,20 +10,25 @@ Key design decisions:
   • Gunicorn timeout is raised to 300 s to survive slow cold starts.
   • Images are resized before inference to reduce CPU work.
   • Two-stage pipeline: YOLOv8 (maize vs non-maize) → Keras (disease).
+  • Environment variables set BEFORE importing heavy libraries to suppress
+    warnings, font cache builds, and config directory issues on Render.
 """
 
-import base64
+# ─── CRITICAL: Set environment variables BEFORE any heavy imports ──────────────
 import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["YOLO_CONFIG_DIR"] = "/tmp/Ultralytics"
+os.environ["MPLBACKEND"] = "Agg"  # Prevent matplotlib font cache issues
+os.environ["OMP_NUM_THREADS"] = "1"  # Limit CPU threads for free tier
+
+import base64
 import json
 import uuid
-import io
-from datetime import datetime
 import warnings
-from PIL import Image
+from datetime import datetime
 from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
 
-# ─── Suppress noisy warnings ───────────────────────────────────────────────────
 warnings.filterwarnings("ignore")
 
 try:
@@ -35,17 +40,14 @@ except Exception:
 # ─── Config ────────────────────────────────────────────────────────────────────
 UPLOAD_FOLDER = "storage/uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
-MAX_IMAGE_SIZE = 1024          # resize longest side to this before inference
-JPEG_QUALITY = 85
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 API_VERSION = "v1"
 FRONTEND_ORIGINS = [
-    o.strip()
-    for o in os.getenv("FRONTEND_ORIGINS", "*").split(",")
-    if o.strip()
+    o.strip() for o in os.getenv("FRONTEND_ORIGINS", "*").split(",") if o.strip()
 ]
+
 
 # ─── CORS ──────────────────────────────────────────────────────────────────────
 @app.after_request
@@ -127,13 +129,13 @@ def _load_yolo():
         if os.path.exists(YOLO_MODEL_PATH):
             yolo_model = YOLO(YOLO_MODEL_PATH)
             loaded_yolo_path = YOLO_MODEL_PATH
-            print(f"[MODEL] YOLO loaded: {YOLO_MODEL_PATH}  classes={yolo_model.names}")
+            print(f"[MODEL] YOLO loaded: {YOLO_MODEL_PATH}  classes={yolo_model.names}", flush=True)
         else:
-            print(f"[MODEL] WARNING — YOLO file not found: {YOLO_MODEL_PATH}")
+            print(f"[MODEL] WARNING - YOLO file not found: {YOLO_MODEL_PATH}", flush=True)
     except ImportError:
-        print("[MODEL] WARNING — ultralytics not installed")
+        print("[MODEL] WARNING - ultralytics not installed", flush=True)
     except Exception as e:
-        print(f"[MODEL] WARNING — YOLO load failed: {e}")
+        print(f"[MODEL] WARNING - YOLO load failed: {e}", flush=True)
 
 
 def _load_keras():
@@ -141,17 +143,16 @@ def _load_keras():
     try:
         import tensorflow as tf
         tf.get_logger().setLevel("ERROR")
-        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
         from tensorflow.keras.models import load_model
         for p in KERAS_MODEL_PATHS:
             if os.path.exists(p):
                 keras_model = load_model(p)
                 keras_input_shape = getattr(keras_model, "input_shape", (None, 224, 224, 3))
                 loaded_keras_path = p
-                print(f"[MODEL] Keras loaded: {p}  input_shape={keras_input_shape}")
+                print(f"[MODEL] Keras loaded: {p}  input_shape={keras_input_shape}", flush=True)
                 break
     except Exception as e:
-        print(f"[MODEL] WARNING — Keras load failed: {e}")
+        print(f"[MODEL] WARNING - Keras load failed: {e}", flush=True)
 
 
 def _load_joblib():
@@ -162,27 +163,25 @@ def _load_joblib():
             if os.path.exists(p):
                 joblib_model = joblib.load(p)
                 loaded_joblib_path = p
-                print(f"[MODEL] Joblib loaded: {p}")
+                print(f"[MODEL] Joblib loaded: {p}", flush=True)
                 break
     except Exception as e:
-        print(f"[MODEL] WARNING — Joblib load failed: {e}")
+        print(f"[MODEL] WARNING - Joblib load failed: {e}", flush=True)
 
 
 def _load_json_artefacts():
     global response_map, intent_labels, labels_list, knowledge_base
 
-    # Knowledge base
     for kb_path in DISEASE_KNOWLEDGE_BASE_PATHS:
         if os.path.exists(kb_path):
             try:
                 with open(kb_path, "r", encoding="utf-8") as f:
                     knowledge_base = json.load(f)
-                print(f"[DATA] Knowledge base: {kb_path} ({len(knowledge_base)} entries)")
+                print(f"[DATA] Knowledge base: {kb_path} ({len(knowledge_base)} entries)", flush=True)
                 break
             except Exception:
                 pass
 
-    # Response map
     for rp in RESPONSE_MAP_PATHS:
         if os.path.exists(rp):
             try:
@@ -191,30 +190,28 @@ def _load_json_artefacts():
                 for k, v in raw.items():
                     response_map[k] = [s.strip() for s in v.split(",")] if isinstance(v, str) and "," in v else v
                 loaded_response_map_path = rp
-                print(f"[DATA] Response map: {rp} ({len(response_map)} categories)")
+                print(f"[DATA] Response map: {rp} ({len(response_map)} categories)", flush=True)
                 break
             except Exception:
                 pass
 
-    # Intent labels
     for lp in INTENT_LABELS_PATHS:
         if os.path.exists(lp):
             try:
                 with open(lp, "r", encoding="utf-8") as f:
                     d = json.load(f)
-                intent_labels = d.get("intent_list", d) if isinstance(d, dict) else d
+                intent_labels.extend(d.get("intent_list", d) if isinstance(d, dict) else d)
                 loaded_intent_labels_path = lp
-                print(f"[DATA] Intent labels: {lp} ({len(intent_labels)} intents)")
+                print(f"[DATA] Intent labels: {lp} ({len(intent_labels)} intents)", flush=True)
                 break
             except Exception:
                 pass
 
-    # Disease labels
     if os.path.exists(DISEASE_LABELS_PATH):
         try:
             with open(DISEASE_LABELS_PATH, "r", encoding="utf-8") as f:
                 labels_list.extend(json.load(f))
-            print(f"[DATA] Disease labels: {DISEASE_LABELS_PATH} ({len(labels_list)} classes)")
+            print(f"[DATA] Disease labels: {DISEASE_LABELS_PATH} ({len(labels_list)} classes)", flush=True)
         except Exception:
             pass
     else:
@@ -223,7 +220,7 @@ def _load_json_artefacts():
             "Leaf_Blight_disease", "Downy_Mildew_disease",
             "Maize_Streak_Virus_disease", "Maize_Lethal_Necrosis_disease",
         ])
-        print(f"[DATA] Using default disease labels ({len(labels_list)} classes)")
+        print(f"[DATA] Using default disease labels ({len(labels_list)} classes)", flush=True)
 
 
 # ─── Load everything at import time ────────────────────────────────────────────
@@ -231,7 +228,7 @@ _load_yolo()
 _load_keras()
 _load_joblib()
 _load_json_artefacts()
-print("[STARTUP] All models and data loaded.\n")
+print("[STARTUP] All models and data loaded.", flush=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -353,14 +350,6 @@ def build_maize_health_report(label_name):
     )
 
 
-def _preprocess_image(image_path):
-    """Resize image to reduce inference time, return numpy array."""
-    img = Image.open(image_path).convert("RGB")
-    img.thumbnail((MAX_IMAGE_SIZE, MAX_IMAGE_SIZE), Image.LANCZOS)
-    import numpy as np
-    return np.array(img)
-
-
 def _decode_image_data(image_data):
     if not image_data:
         raise ValueError("missing image data")
@@ -385,7 +374,11 @@ def _get_payload():
 # INFERENCE
 # ═══════════════════════════════════════════════════════════════════════════════
 def classify_maize(image_path):
-    """Stage 1: YOLOv8 — returns (is_maize, class_name, confidence)."""
+    """Stage 1: YOLOv8 - returns (is_maize, class_name, confidence)."""
+    global yolo_model
+    if yolo_model is None:
+        print("[YOLO] Model not loaded, attempting reload...", flush=True)
+        _load_yolo()
     if yolo_model is None:
         raise RuntimeError("YOLO model not available")
     results = yolo_model(image_path, verbose=False)
@@ -406,7 +399,11 @@ def classify_maize(image_path):
 
 
 def classify_disease(image_path):
-    """Stage 2: Keras — returns (label_name, condition_name, confidence)."""
+    """Stage 2: Keras - returns (label_name, condition_name, confidence)."""
+    global keras_model
+    if keras_model is None:
+        print("[KERAS] Model not loaded, attempting reload...", flush=True)
+        _load_keras()
     if keras_model is None:
         raise RuntimeError("Keras model not available")
     import numpy as np
@@ -429,16 +426,16 @@ def classify_disease(image_path):
 
 def handle_image_prediction(save_path, filename, input_source):
     """Full two-stage pipeline."""
-    print(f"\n[PREDICT] {filename}  source={input_source}")
+    print(f"\n[PREDICT] {filename}  source={input_source}", flush=True)
 
-    # Stage 1
+    # Stage 1: YOLO maize / non-maize
     try:
         is_maize, yolo_cls, yolo_conf = classify_maize(save_path)
     except Exception as e:
-        print(f"  YOLO error: {e}")
+        print(f"  YOLO error: {e}", flush=True)
         return api_response(False, status=500, error=f"Image check failed: {e}")
 
-    print(f"  YOLO: {yolo_cls} ({yolo_conf:.3f})  is_maize={is_maize}")
+    print(f"  YOLO: {yolo_cls} ({yolo_conf:.3f})  is_maize={is_maize}", flush=True)
 
     if not is_maize:
         report = build_non_maize_report()
@@ -450,16 +447,16 @@ def handle_image_prediction(save_path, filename, input_source):
             answer=report, report=report, file_name=filename,
         )
 
-    # Stage 2
+    # Stage 2: Keras disease classification
     try:
         label, condition, disease_conf = classify_disease(save_path)
     except Exception as e:
-        print(f"  Keras error: {e}")
+        print(f"  Keras error: {e}", flush=True)
         return api_response(False, status=500, error=f"Disease prediction failed: {e}")
 
     stage = get_disease_stage(label)
     report = build_maize_health_report(label)
-    print(f"  Disease: {condition} ({disease_conf:.3f})  stage={stage}\n")
+    print(f"  Disease: {condition} ({disease_conf:.3f})  stage={stage}\n", flush=True)
 
     return api_response(
         True, type="image", input_source=input_source,
@@ -496,10 +493,13 @@ def api_health():
 
 @app.route("/api/warmup", methods=["GET"])
 def api_warmup():
-    """
-    Warmup endpoint — call after deploy to ensure models are loaded.
-    Render / uptime monitors can hit this to keep the app warm.
-    """
+    """Warmup endpoint - call after deploy to ensure models are loaded."""
+    global yolo_model, keras_model
+    # Force reload if somehow None
+    if yolo_model is None:
+        _load_yolo()
+    if keras_model is None:
+        _load_keras()
     return api_response(
         True, status="warm",
         yolo_loaded=yolo_model is not None,
@@ -556,7 +556,7 @@ def api_predict():
     if question:
         response_text = "Sorry, I don't have an answer for that yet."
         label = None
-        print(f"\n[TEXT] {question}")
+        print(f"\n[TEXT] {question}", flush=True)
 
         if joblib_model is not None:
             try:
@@ -574,7 +574,7 @@ def api_predict():
                     raw = response_text
                 response_text = raw[0] if isinstance(raw, list) and raw else str(raw) if raw else response_text
             except Exception as e:
-                print(f"  Joblib error: {e}")
+                print(f"  Joblib error: {e}", flush=True)
                 for k in response_map:
                     if k.lower() in question.lower():
                         label, raw = k, response_map[k]
@@ -587,7 +587,7 @@ def api_predict():
                     response_text = raw[0] if isinstance(raw, list) and raw else str(raw)
                     break
 
-        print(f"  Response: {response_text[:80]}...\n")
+        print(f"  Response: {response_text[:80]}...\n", flush=True)
         return api_response(True, type="text", label=label, response=response_text, model_path=loaded_joblib_path)
 
     return api_response(False, status=400, error="No input received (provide question or image)")

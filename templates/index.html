@@ -764,7 +764,18 @@
         setLoading(false);
 
         if (!data.ok) {
-          showError(data.error || 'Something went wrong.');
+          // Show non-maize rejection as assistant message, not just error
+          if (data.answer || data.report) {
+            appendMessage('assistant', `
+              <div style="font-weight:800; margin-bottom:6px;">Assistant</div>
+              <div style="background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:14px 18px; border-radius:12px; margin-bottom:8px;">
+                ⚠️ ${escapeHtml(data.error || 'Not a maize image.')}
+              </div>
+              <div>${escapeHtml((data.answer || data.report || '').replace(/^⚠️.*\n\n/, ''))}</div>
+            `);
+          } else {
+            showError(data.error || 'Something went wrong.');
+          }
           return;
         }
 
