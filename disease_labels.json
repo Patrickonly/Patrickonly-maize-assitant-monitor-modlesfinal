@@ -5,5 +5,9 @@
   "Leaf_Blight_disease",
   "Downy_Mildew_disease",
   "Maize_Streak_Virus_disease",
-  "Maize_Lethal_Necrosis_disease"
+  "Maize_Lethal_Necrosis_disease",
+  "sorghum",
+  "other_crops",
+  "weeds_grasses",
+  "non_plant"
 ]

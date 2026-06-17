@@ -1,0 +1,82 @@
+Epoch 1/5
+[1m188/188[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 554ms/step - accuracy: 0.1551 - loss: 2.4266
+Epoch 1: val_accuracy improved from None to 0.29405, saving model to d:\CAPSTONE PROJECT\datasets\maize trainningsystem\modelmaize_detection.keras
+[1m188/188[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m154s[0m 723ms/step - accuracy: 0.1580 - loss: 2.3341 - val_accuracy: 0.2940 - val_loss: 1.8987 - learning_rate: 1.0000e-04
+Epoch 2/5
+[1m188/188[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 533ms/step - accuracy: 0.1916 - loss: 2.1017
+Epoch 2: val_accuracy did not improve from 0.29405
+[1m188/188[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m141s[0m 737ms/step - accuracy: 0.2010 - loss: 2.0814 - val_accuracy: 0.2929 - val_loss: 1.8374 - learning_rate: 1.0000e-04
+Epoch 3/5
+[1m 27/188[0m [32m━━[0m[37m━━━━━━━━━━━━━━━━━━[0m [1m1:47[0m 667ms/step - accuracy: 0.1888 - loss: 2.1122
+Best model not found; using current model instance
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m8s[0m 8s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m3s[0m 3s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m3s[0m 3s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m2s[0m 2s/step
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m8s[0m 8s/step
+Accuracy: 0.4731934731934732
+
+Classification report:
+
+                               precision    recall  f1-score   support
+
+          Common_Rust_disease       0.23      0.98      0.37       127
+         Downy_Mildew_disease       0.00      0.00      0.00        31
+       Gray_Leaf_Spot_disease       0.00      0.00      0.00        57
+                Healthy_maize       0.00      0.00      0.00        90
+          Leaf_Blight_disease       0.00      0.00      0.00       109
+Maize_Lethal_Necrosis_disease       0.00      0.00      0.00       151
+   Maize_Streak_Virus_disease       0.90      0.96      0.93       293
+
+                     accuracy                           0.47       858
+                    macro avg       0.16      0.28      0.19       858
+                 weighted avg       0.34      0.47      0.37       858
+
+
+
+Prediction Summary:
+                      image                    true_label               predicted_label confidence  correct stage
+             Image_1972.jpg Maize_Lethal_Necrosis_disease Maize_Lethal_Necrosis_disease      42.6%     True Early
+             Image_1235.jpg Maize_Lethal_Necrosis_disease                 Healthy_maize      37.8%    False Early
+ Corn_Common_Rust (626).JPG           Common_Rust_disease    Maize_Streak_Virus_disease      32.9%    False Early
+             Image_5621.jpg    Maize_Streak_Virus_disease                 Healthy_maize      39.4%    False Early
+      Corn_Blight (305).JPG           Leaf_Blight_disease           Leaf_Blight_disease      29.5%     True Early
+             Image_1135.jpg Maize_Lethal_Necrosis_disease                 Healthy_maize      25.7%    False Early
+   Corn_Gray_Spot (151).jpg        Gray_Leaf_Spot_disease          Downy_Mildew_disease      24.3%    False Early
+             Image_3810.jpg    Maize_Streak_Virus_disease    Maize_Streak_Virus_disease      35.9%     True Early
+             Image_1876.jpg Maize_Lethal_Necrosis_disease           Leaf_Blight_disease      27.7%    False Early
+ Corn_Common_Rust (916).JPG           Common_Rust_disease           Leaf_Blight_disease      26.2%    False Early
+     Corn_Health (1006).jpg                 Healthy_maize                 Healthy_maize      26.0%     True Early
+             Image_1141.jpg Maize_Lethal_Necrosis_disease           Leaf_Blight_disease      30.4%    False Early
+      Corn_Health (519).jpg                 Healthy_maize                 Healthy_maize      37.5%     True Early
+Corn_Common_Rust (1030).JPG           Common_Rust_disease                 Healthy_maize      46.1%    False Early
+             Image_4132.jpg    Maize_Streak_Virus_disease           Leaf_Blight_disease      22.7%    False Early
+              Image_217.jpg Maize_Lethal_Necrosis_disease Maize_Lethal_Necrosis_disease      40.9%     True Early
+ Corn_Common_Rust (260).JPG           Common_Rust_disease                 Healthy_maize      37.9%    False Early
+     Corn_Blight (1113).jpg           Leaf_Blight_disease                 Healthy_maize      40.8%    False Early
+             Image_1157.jpg Maize_Lethal_Necrosis_disease           Leaf_Blight_disease      24.5%    False Early
+ Corn_Common_Rust (188).JPG           Common_Rust_disease    Maize_Streak_Virus_disease      28.3%    False Early
+
+Accuracy on displayed images: 30.0%
