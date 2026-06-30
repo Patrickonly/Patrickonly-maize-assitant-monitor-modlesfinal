@@ -62,33 +62,33 @@ def add_cors_headers(response):
 # ─── Global error handlers — always return valid JSON ─────────────────────────
 @app.errorhandler(400)
 def bad_request(e):
-    return api_response(False, status=400, error=str(e.description) if hasattr(e, 'description') else 'Bad request')
+    return api_response(False, http_status=400, error=str(e.description) if hasattr(e, 'description') else 'Bad request')
 
 @app.errorhandler(404)
 def not_found(e):
-    return api_response(False, status=404, error='Not found')
+    return api_response(False, http_status=404, error='Not found')
 
 @app.errorhandler(405)
 def method_not_allowed(e):
-    return api_response(False, status=405, error='Method not allowed')
+    return api_response(False, http_status=405, error='Method not allowed')
 
 @app.errorhandler(413)
 def payload_too_large(e):
-    return api_response(False, status=413, error='File too large (max 16 MB)')
+    return api_response(False, http_status=413, error='File too large (max 16 MB)')
 
 @app.errorhandler(500)
 def internal_error(e):
-    return api_response(False, status=500, error='Internal server error')
+    return api_response(False, http_status=500, error='Internal server error')
 
 @app.errorhandler(Exception)
 def handle_exception(e):
     import traceback
     print(f"[ERROR] Unhandled exception: {e}", flush=True)
     traceback.print_exc()
-    return api_response(False, status=500, error='Server error — please try again')
+    return api_response(False, http_status=500, error='Server error — please try again')
 
 
-def api_response(ok, status=200, **payload):
+def api_response(ok, http_status=200, **payload):
     data = {
         "ok": ok,
         "api_version": API_VERSION,
@@ -96,7 +96,7 @@ def api_response(ok, status=200, **payload):
         **payload,
     }
     resp = jsonify(data)
-    resp.status_code = status
+    resp.status_code = http_status
     return resp
 
 
@@ -468,7 +468,7 @@ def classify_disease(image_path):
 def handle_image_prediction(save_path, filename, input_source):
     """Full two-stage pipeline."""
     if not _ensure_models_loaded():
-        return api_response(False, status=503, error='Models are still loading. Please wait a moment and try again.')
+        return api_response(False, http_status=503, error='Models are still loading. Please wait a moment and try again.')
     print(f"\n[PREDICT] {filename}  source={input_source}", flush=True)
 
     # Stage 1: YOLO maize / non-maize
@@ -476,14 +476,14 @@ def handle_image_prediction(save_path, filename, input_source):
         is_maize, yolo_cls, yolo_conf = classify_maize(save_path)
     except Exception as e:
         print(f"  YOLO error: {e}", flush=True)
-        return api_response(False, status=500, error=f"Image check failed: {e}")
+        return api_response(False, http_status=500, error=f"Image check failed: {e}")
 
     print(f"  YOLO: {yolo_cls} ({yolo_conf:.3f})  is_maize={is_maize}", flush=True)
 
     if not is_maize:
         report = build_non_maize_report()
         return api_response(
-            False, status=400, type="image", input_source=input_source,
+            False, http_status=400, type="image", input_source=input_source,
             valid_image=False, is_maize=False,
             yolo_class=yolo_cls, yolo_confidence=round(yolo_conf, 4),
             error="This is not a maize image. Please upload a maize leaf image.",
@@ -495,7 +495,7 @@ def handle_image_prediction(save_path, filename, input_source):
         label, condition, disease_conf = classify_disease(save_path)
     except Exception as e:
         print(f"  Keras error: {e}", flush=True)
-        return api_response(False, status=500, error=f"Disease prediction failed: {e}")
+        return api_response(False, http_status=500, error=f"Disease prediction failed: {e}")
 
     stage = get_disease_stage(label)
     report = build_maize_health_report(label)
@@ -582,7 +582,7 @@ def api_predict():
             save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             file.save(save_path)
             return handle_image_prediction(save_path, filename, "multipart/form-data")
-        return api_response(False, status=400, error="Invalid file type")
+        return api_response(False, http_status=400, error="Invalid file type")
 
     # Base64 JSON
     image_data = payload.get("image_base64") or payload.get("image")
@@ -591,7 +591,7 @@ def api_predict():
             save_path, filename = _decode_image_data(image_data)
             return handle_image_prediction(save_path, filename, "json-base64")
         except Exception as e:
-            return api_response(False, status=400, error=f"Image decode failed: {e}")
+            return api_response(False, http_status=400, error=f"Image decode failed: {e}")
 
     # Text question
     question = (payload.get("question") or payload.get("message") or request.form.get("question") or "").strip()
@@ -633,7 +633,7 @@ def api_predict():
         print(f"  Response: {response_text[:80]}...\n", flush=True)
         return api_response(True, type="text", label=label, response=response_text, model_path=loaded_joblib_path)
 
-    return api_response(False, status=400, error="No input received (provide question or image)")
+    return api_response(False, http_status=400, error="No input received (provide question or image)")
 
 
 @app.route("/api/chat", methods=["POST"])
@@ -641,7 +641,7 @@ def api_chat():
     data = _get_payload()
     message = (data.get("message") or data.get("question") or "").strip()
     if not message:
-        return api_response(False, status=400, error="empty message")
+        return api_response(False, http_status=400, error="empty message")
     for k, v in response_map.items():
         if k.lower() in message.lower():
             return api_response(True, response=v, source="local-response-map", label=k)
