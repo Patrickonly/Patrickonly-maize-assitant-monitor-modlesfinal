@@ -107,7 +107,7 @@ def allowed_file(filename):
 # ═══════════════════════════════════════════════════════════════════════════════
 # MODEL PATHS
 # ═══════════════════════════════════════════════════════════════════════════════
-YOLO_MODEL_PATH = "best.pt"
+YOLO_MODEL_PATHS = ["best1.pt", "best.pt"]
 KERAS_MODEL_PATHS = ["maizediseaseprogression.keras"]
 DISEASE_LABELS_PATH = "disease_labels.json"
 DISEASE_KNOWLEDGE_BASE_PATHS = [
@@ -153,12 +153,14 @@ def _load_yolo():
     global yolo_model, loaded_yolo_path
     try:
         from ultralytics import YOLO
-        if os.path.exists(YOLO_MODEL_PATH):
-            yolo_model = YOLO(YOLO_MODEL_PATH)
-            loaded_yolo_path = YOLO_MODEL_PATH
-            print(f"[MODEL] YOLO loaded: {YOLO_MODEL_PATH}  classes={yolo_model.names}", flush=True)
+        for p in YOLO_MODEL_PATHS:
+            if os.path.exists(p):
+                yolo_model = YOLO(p)
+                loaded_yolo_path = p
+                print(f"[MODEL] YOLO loaded: {p}  classes={yolo_model.names}", flush=True)
+                break
         else:
-            print(f"[MODEL] WARNING - YOLO file not found: {YOLO_MODEL_PATH}", flush=True)
+            print(f"[MODEL] WARNING - YOLO files not found: {', '.join(YOLO_MODEL_PATHS)}", flush=True)
     except ImportError:
         print("[MODEL] WARNING - ultralytics not installed", flush=True)
     except Exception as e:

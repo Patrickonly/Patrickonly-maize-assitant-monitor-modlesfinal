@@ -39,6 +39,7 @@ storage/predictions.db
 # DO NOT ignore keras and joblib files
 !*.keras
 !*.joblib
+!*.pt
 
 # Ignore large files that are not needed
 *.csv
