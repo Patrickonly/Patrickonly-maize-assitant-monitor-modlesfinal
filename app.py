@@ -155,9 +155,11 @@ def _load_yolo():
         from ultralytics import YOLO
         for p in YOLO_MODEL_PATHS:
             if os.path.exists(p):
+                # Optimize YOLO for CPU inference
                 yolo_model = YOLO(p)
+                yolo_model.fuse()  # Fuse layers for faster inference
                 loaded_yolo_path = p
-                print(f"[MODEL] YOLO loaded: {p}  classes={yolo_model.names}", flush=True)
+                print(f"[MODEL] YOLO loaded & optimized: {p}  classes={yolo_model.names}", flush=True)
                 break
         else:
             print(f"[MODEL] WARNING - YOLO files not found: {', '.join(YOLO_MODEL_PATHS)}", flush=True)
@@ -172,13 +174,18 @@ def _load_keras():
     try:
         import tensorflow as tf
         tf.get_logger().setLevel("ERROR")
+        # Optimize TensorFlow for CPU
+        tf.config.threading.set_intra_op_parallelism_threads(4)
+        tf.config.threading.set_inter_op_parallelism_threads(4)
         from tensorflow.keras.models import load_model
         for p in KERAS_MODEL_PATHS:
             if os.path.exists(p):
                 keras_model = load_model(p)
+                # Compile with optimizer to avoid re-compiling
+                keras_model.compile(optimizer="adam")
                 keras_input_shape = getattr(keras_model, "input_shape", (None, 224, 224, 3))
                 loaded_keras_path = p
-                print(f"[MODEL] Keras loaded: {p}  input_shape={keras_input_shape}", flush=True)
+                print(f"[MODEL] Keras loaded & optimized: {p}  input_shape={keras_input_shape}", flush=True)
                 break
     except Exception as e:
         print(f"[MODEL] WARNING - Keras load failed: {e}", flush=True)
@@ -272,6 +279,9 @@ def _ensure_models_loaded():
 
 # ─── Load JSON artefacts at import time (fast, no heavy deps) ─────────────────
 _load_json_artefacts()
+# ─── Preload models for fast response ─────────────────────────────────────────
+print("[STARTUP] Preloading models for fast response...", flush=True)
+_ensure_models_loaded()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -423,7 +433,8 @@ def classify_maize(image_path):
         _load_yolo()
     if yolo_model is None:
         raise RuntimeError("YOLO model not available")
-    results = yolo_model(image_path, verbose=False)
+    # Run YOLO with minimal output for speed
+    results = yolo_model(image_path, verbose=False, imgsz=224)
     r = results[0]
     if hasattr(r, "probs") and r.probs is not None:
         idx = int(r.probs.top1)
@@ -454,7 +465,8 @@ def classify_disease(image_path):
     img = load_img(image_path, target_size=target)
     x = img_to_array(img)
     x = np.expand_dims(x, axis=0) / 255.0
-    preds = keras_model.predict(x, verbose=0)
+    # Predict with batch size 1 for speed
+    preds = keras_model.predict(x, verbose=0, batch_size=1)
     arr = preds[0] if len(preds.shape) > 1 else preds
     idx = int(np.argmax(arr))
     conf = float(arr[idx])
