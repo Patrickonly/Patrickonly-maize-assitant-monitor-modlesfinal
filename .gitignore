@@ -21,6 +21,21 @@ __pycache__/
 .venv/
 .sixth/
 
+# Ignore IDE config
+.vscode/
+
+# Ignore Ultralytics cache
+Ultralytics/
+
+# Ignore temp files
+acc_temp.txt
+*.tmp
+*.swp
+
+# Ignore uploads
+storage/uploads/
+storage/predictions.db
+
 # DO NOT ignore keras and joblib files
 !*.keras
 !*.joblib
