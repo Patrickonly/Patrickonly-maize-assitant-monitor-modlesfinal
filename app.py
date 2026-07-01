@@ -319,9 +319,14 @@ def _background_model_load():
     _ensure_models_loaded()
     print("[STARTUP] Background model loading complete.", flush=True)
 
-_loader_thread = threading.Thread(target=_background_model_load, daemon=True)
-_loader_thread.start()
+_loader_thread = None
 
+@app.before_request
+def start_background_thread_if_needed():
+    global _loader_thread
+    if not _models_loaded and (_loader_thread is None or not _loader_thread.is_alive()):
+        _loader_thread = threading.Thread(target=_background_model_load, daemon=True)
+        _loader_thread.start()
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HELPERS
