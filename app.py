@@ -498,9 +498,7 @@ def classify_maize(image_path):
     if yolo_model is None:
         raise RuntimeError("YOLO model not available")
     # Run YOLO with minimal output for speed
-    from PIL import Image
-    img = Image.open(image_path).convert("RGB")
-    results = yolo_model.predict(img, verbose=False, imgsz=224)
+    results = yolo_model.predict(image_path, verbose=False)
     r = results[0]
     if hasattr(r, "probs") and r.probs is not None:
         idx = int(r.probs.top1)
@@ -513,7 +511,8 @@ def classify_maize(image_path):
         name = yolo_model.names[idx]
     else:
         raise RuntimeError("YOLO returned no predictions")
-    is_maize = name.lower().replace("-", "_").replace(" ", "_") == "maize"
+    # Match user's exact verification script
+    is_maize = "maize" in name.lower()
     return is_maize, name, conf
 
 
