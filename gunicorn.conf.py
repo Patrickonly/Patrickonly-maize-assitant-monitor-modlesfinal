@@ -13,8 +13,8 @@ threads = 2
 # Graceful timeout — gives worker time to load models on first request
 graceful_timeout = 120
 
-# Hard kill after 2 min
-timeout = 120
+# Hard kill after 5 min — allows time for inference on slow free-tier CPUs
+timeout = 300
 
 # Don't preload — we want the port to bind FIRST, then models load on first request
 preload_app = False

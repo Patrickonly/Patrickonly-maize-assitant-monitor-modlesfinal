@@ -492,7 +492,7 @@ def classify_disease(image_path):
 
 def handle_image_prediction(save_path, filename, input_source):
     """Full two-stage pipeline."""
-    if not _ensure_models_loaded():
+    if not _models_loaded:
         return api_response(False, http_status=503, error='Models are still loading. Please wait a moment and try again.')
     print(f"\n[PREDICT] {filename}  source={input_source}", flush=True)
 
@@ -562,24 +562,27 @@ def api_health():
 @app.route("/api/warmup", methods=["GET"])
 def api_warmup():
     """
-    Warmup endpoint - call after deploy to load models before real users hit the app.
-    Render / uptime monitors can ping this to pre-load models.
+    Warmup endpoint — returns model loading status instantly (never blocks).
+    Render / uptime monitors can ping this to check readiness.
     """
-    _ensure_models_loaded()
     return api_response(
-        True, status="warm",
+        True, status="warm" if _models_loaded else "loading",
+        models_ready=_models_loaded,
         yolo_loaded=yolo_model is not None,
-        yolo_classes=yolo_model.names if yolo_model else None,
         keras_loaded=keras_model is not None,
-        keras_input_shape=keras_input_shape,
         disease_classes=len(labels_list),
         text_intents=len(intent_labels),
     )
 
 
+@app.route("/api/status", methods=["GET"])
+def api_status():
+    """Lightweight status check — frontend polls this to know when models are ready."""
+    return api_response(True, models_ready=_models_loaded)
+
+
 @app.route("/api/model-info", methods=["GET"])
 def api_model_info():
-    _ensure_models_loaded()
     return api_response(
         True,
         yolo_model=loaded_yolo_path,
@@ -621,7 +624,8 @@ def api_predict():
     # Text question
     question = (payload.get("question") or payload.get("message") or request.form.get("question") or "").strip()
     if question:
-        _ensure_models_loaded()
+        if not _models_loaded:
+            return api_response(False, http_status=503, error='Models are still loading. Please wait a moment and try again.')
         response_text = "Sorry, I don't have an answer for that yet."
         label = None
         print(f"\n[TEXT] {question}", flush=True)
