@@ -680,6 +680,9 @@ def api_predict():
     # Text question
     question = (payload.get("question") or payload.get("message") or request.form.get("question") or "").strip()
     if question:
+        if joblib_model is None:
+            _load_joblib()
+        
         response_text = "Sorry, I cannot assist you."
         if joblib_model is None:
             response_text = "Model not loaded well. Sorry, I cannot assist you."
