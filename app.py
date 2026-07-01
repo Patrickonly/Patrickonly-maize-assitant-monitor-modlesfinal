@@ -13,7 +13,12 @@ Key design decisions:
 
 # ─── CRITICAL: Set environment variables BEFORE any heavy imports ──────────────
 import os
+import gc
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"      # Reduce TF memory footprint
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"       # Force CPU — skip GPU probing entirely
+os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+os.environ["MALLOC_TRIM_THRESHOLD_"] = "65536"  # Help Linux reclaim freed memory
 os.environ["YOLO_CONFIG_DIR"] = "/tmp/Ultralytics"
 os.environ["MPLBACKEND"] = "Agg"
 os.environ["OMP_NUM_THREADS"] = "1"
@@ -136,7 +141,10 @@ yolo_model = None
 keras_model = None
 keras_input_shape = None
 joblib_model = None
-_models_loaded = False
+_yolo_ready = False
+_keras_ready = False
+_joblib_ready = False
+_models_loaded = False   # True when ALL models are loaded
 _models_lock = threading.Lock()
 
 response_map = {}
@@ -152,19 +160,20 @@ loaded_intent_labels_path = None
 
 
 def _load_yolo():
-    global yolo_model, loaded_yolo_path
+    global yolo_model, loaded_yolo_path, _yolo_ready
     try:
         from ultralytics import YOLO
         for p in YOLO_MODEL_PATHS:
             if os.path.exists(p):
-                # Optimize YOLO for CPU inference
                 yolo_model = YOLO(p)
-                yolo_model.fuse()  # Fuse layers for faster inference
+                yolo_model.fuse()
                 loaded_yolo_path = p
-                print(f"[MODEL] YOLO loaded & optimized: {p}  classes={yolo_model.names}", flush=True)
+                _yolo_ready = True
+                print(f"[MODEL] YOLO loaded: {p}  classes={yolo_model.names}", flush=True)
+                gc.collect()
                 break
         else:
-            print(f"[MODEL] WARNING - YOLO files not found: {', '.join(YOLO_MODEL_PATHS)}", flush=True)
+            print(f"[MODEL] WARNING - YOLO not found: {', '.join(YOLO_MODEL_PATHS)}", flush=True)
     except ImportError:
         print("[MODEL] WARNING - ultralytics not installed", flush=True)
     except Exception as e:
@@ -172,36 +181,38 @@ def _load_yolo():
 
 
 def _load_keras():
-    global keras_model, keras_input_shape, loaded_keras_path
+    global keras_model, keras_input_shape, loaded_keras_path, _keras_ready
     try:
         import tensorflow as tf
         tf.get_logger().setLevel("ERROR")
-        # Optimize TensorFlow for CPU
-        tf.config.threading.set_intra_op_parallelism_threads(4)
-        tf.config.threading.set_inter_op_parallelism_threads(4)
+        # Minimal threads to reduce memory on free tier
+        tf.config.threading.set_intra_op_parallelism_threads(2)
+        tf.config.threading.set_inter_op_parallelism_threads(2)
         from tensorflow.keras.models import load_model
         for p in KERAS_MODEL_PATHS:
             if os.path.exists(p):
-                keras_model = load_model(p)
-                # Compile with optimizer to avoid re-compiling
-                keras_model.compile(optimizer="adam")
+                keras_model = load_model(p, compile=False)  # Skip compile — saves memory
                 keras_input_shape = getattr(keras_model, "input_shape", (None, 224, 224, 3))
                 loaded_keras_path = p
-                print(f"[MODEL] Keras loaded & optimized: {p}  input_shape={keras_input_shape}", flush=True)
+                _keras_ready = True
+                print(f"[MODEL] Keras loaded: {p}  input_shape={keras_input_shape}", flush=True)
+                gc.collect()
                 break
     except Exception as e:
         print(f"[MODEL] WARNING - Keras load failed: {e}", flush=True)
 
 
 def _load_joblib():
-    global joblib_model, loaded_joblib_path
+    global joblib_model, loaded_joblib_path, _joblib_ready
     try:
-        import joblib
+        import joblib as jl
         for p in JOBLIB_MODEL_PATHS:
             if os.path.exists(p):
-                joblib_model = joblib.load(p)
+                joblib_model = jl.load(p)
                 loaded_joblib_path = p
+                _joblib_ready = True
                 print(f"[MODEL] Joblib loaded: {p}", flush=True)
+                gc.collect()
                 break
     except Exception as e:
         print(f"[MODEL] WARNING - Joblib load failed: {e}", flush=True)
@@ -267,18 +278,25 @@ def _ensure_models_loaded():
     if _models_loaded:
         return True
     with _models_lock:
-        if _models_loaded:          # double-check after acquiring lock
+        if _models_loaded:
             return True
         print("[STARTUP] Loading models...", flush=True)
         try:
-            _load_yolo()
-            _load_keras()
+            # Load joblib FIRST (tiny, instant) so text queries work immediately
             _load_joblib()
+            # Load YOLO next (moderate, ~30s)
+            _load_yolo()
+            gc.collect()  # Free memory before heavy TF load
+            # Load Keras LAST (heaviest, can take 2-5 min on free tier)
+            _load_keras()
+            gc.collect()
             _models_loaded = True
             print("[STARTUP] All models loaded.", flush=True)
             return True
         except Exception as e:
             print(f"[STARTUP] Model loading failed: {e}", flush=True)
+            # Mark as loaded even if Keras failed — partial functionality is better than none
+            _models_loaded = True
             return False
 
 
@@ -492,8 +510,8 @@ def classify_disease(image_path):
 
 def handle_image_prediction(save_path, filename, input_source):
     """Full two-stage pipeline."""
-    if not _models_loaded:
-        return api_response(False, http_status=503, error='Models are still loading. Please wait a moment and try again.')
+    if not _yolo_ready or not _keras_ready:
+        return api_response(False, http_status=503, error='Image models are still loading. Please wait a moment and try again.')
     print(f"\n[PREDICT] {filename}  source={input_source}", flush=True)
 
     # Stage 1: YOLO maize / non-maize
@@ -578,7 +596,12 @@ def api_warmup():
 @app.route("/api/status", methods=["GET"])
 def api_status():
     """Lightweight status check — frontend polls this to know when models are ready."""
-    return api_response(True, models_ready=_models_loaded)
+    return api_response(True,
+        models_ready=_models_loaded,
+        yolo_ready=_yolo_ready,
+        keras_ready=_keras_ready,
+        joblib_ready=_joblib_ready,
+    )
 
 
 @app.route("/api/model-info", methods=["GET"])
@@ -624,8 +647,8 @@ def api_predict():
     # Text question
     question = (payload.get("question") or payload.get("message") or request.form.get("question") or "").strip()
     if question:
-        if not _models_loaded:
-            return api_response(False, http_status=503, error='Models are still loading. Please wait a moment and try again.')
+        # Text queries can work with just the response_map even without joblib
+        # No need to wait for YOLO/Keras
         response_text = "Sorry, I don't have an answer for that yet."
         label = None
         print(f"\n[TEXT] {question}", flush=True)

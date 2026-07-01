@@ -1,12 +1,15 @@
-tensorflow-cpu>=2.10
-pandas
-numpy
-scikit-learn
+# --- Core ML (pinned to avoid pulling NVIDIA/CUDA packages) ---
+tensorflow-cpu==2.15.1
+numpy<2
 pillow
-flask
-opencv-python-headless
-ultralytics>=8.3.0
-
-gunicorn
+scikit-learn
 joblib
+
+# --- YOLO ---
+ultralytics>=8.3.0
+opencv-python-headless
+
+# --- Web server ---
+flask
+gunicorn
 python-dotenv
