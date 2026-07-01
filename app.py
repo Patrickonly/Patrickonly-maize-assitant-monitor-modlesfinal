@@ -331,22 +331,7 @@ def _ensure_models_loaded():
 # ─── Load JSON artefacts at import time (fast, no heavy deps) ─────────────────
 _load_json_artefacts()
 
-# ─── Load models in a BACKGROUND THREAD so gunicorn can bind the port immediately
-
-def _background_model_load():
-    """Load models in background so the port binds first (critical for Render)."""
-    print("[STARTUP] Background model loading started...", flush=True)
-    _ensure_models_loaded()
-    print("[STARTUP] Background model loading complete.", flush=True)
-
-_loader_thread = None
-
-@app.before_request
-def start_background_thread_if_needed():
-    global _loader_thread
-    if not _models_loaded and (_loader_thread is None or not _loader_thread.is_alive()):
-        _loader_thread = threading.Thread(target=_background_model_load, daemon=True)
-        _loader_thread.start()
+# (Background loading removed: models now load synchronously on first request)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HELPERS
@@ -560,8 +545,6 @@ def classify_disease(image_path):
 
 def handle_image_prediction(save_path, filename, input_source):
     """Full two-stage pipeline."""
-    if not _yolo_ready or not _keras_ready:
-        return api_response(False, http_status=503, error='Image models are still loading. Please wait a moment and try again.')
     print(f"\n[PREDICT] {filename}  source={input_source}", flush=True)
 
     # Stage 1: YOLO maize / non-maize
