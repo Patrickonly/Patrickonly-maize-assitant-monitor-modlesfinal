@@ -527,7 +527,7 @@ def classify_disease(image_path):
     import numpy as np
     from PIL import Image
 
-    target = tuple(keras_input_shape[1:3]) if keras_input_shape and len(keras_input_shape) > 2 else (224, 224)
+    target = tuple(keras_input_shape[1:3]) if keras_input_shape is not None and len(keras_input_shape) > 2 else (224, 224)
     img = Image.open(image_path).convert('RGB')
     
     # Resize the image using BILINEAR resampling (compatible with older and newer Pillow versions)
