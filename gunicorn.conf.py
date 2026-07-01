@@ -1,7 +1,8 @@
 import os
 
 # ─── Render requires binding to 0.0.0.0:$PORT ─────────────────────────────────
-bind = f"0.0.0.0:{os.environ.get('PORT', '10000')}"
+port_env = os.environ.get('PORT')
+bind = f"0.0.0.0:{port_env if port_env else '10000'}"
 
 # Single worker to stay within free-tier RAM (512 MB)
 workers = 1
