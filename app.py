@@ -174,7 +174,7 @@ def _load_yolo():
         for p in YOLO_MODEL_PATHS:
             if os.path.exists(p):
                 yolo_model = YOLO(p)
-                yolo_model.fuse()
+                # yolo_model.fuse()  # Disabled to save RAM on Render Free Tier
                 loaded_yolo_path = p
                 _yolo_ready = True
                 print(f"[MODEL] YOLO loaded: {p}  classes={yolo_model.names}", flush=True)
@@ -185,7 +185,8 @@ def _load_yolo():
     except ImportError:
         print("[MODEL] WARNING - ultralytics not installed", flush=True)
     except Exception as e:
-        print(f"[MODEL] WARNING - YOLO load failed: {e}", flush=True)
+        import traceback
+        print(f"[MODEL] WARNING - YOLO load failed: {e}\n{traceback.format_exc()}", flush=True)
 
 
 def _load_keras():
