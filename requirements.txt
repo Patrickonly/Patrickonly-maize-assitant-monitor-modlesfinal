@@ -1,5 +1,5 @@
 # --- Core ML (pinned to avoid pulling NVIDIA/CUDA packages) ---
-tensorflow-cpu==2.15.1
+tflite-runtime
 numpy<2
 pillow
 scikit-learn

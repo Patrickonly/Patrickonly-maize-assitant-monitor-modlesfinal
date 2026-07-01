@@ -191,13 +191,15 @@ def _load_yolo():
 def _load_keras():
     global keras_model, keras_input_shape, loaded_keras_path, _keras_ready
     try:
-        import tensorflow as tf
-        tf.get_logger().setLevel("ERROR")
-        
-        # Try loading TFLite first (uses 90% less memory!)
+        # Try loading TFLite first (uses 90% less memory and imports instantly)
         tflite_path = "maizediseaseprogression.tflite"
         if os.path.exists(tflite_path):
-            keras_model = tf.lite.Interpreter(model_path=tflite_path, num_threads=1)
+            try:
+                import tflite_runtime.interpreter as tflite
+            except ImportError:
+                import tensorflow.lite as tflite
+                
+            keras_model = tflite.Interpreter(model_path=tflite_path, num_threads=1)
             keras_model.allocate_tensors()
             
             input_details = keras_model.get_input_details()
@@ -209,7 +211,9 @@ def _load_keras():
             gc.collect()
             return
 
-        # Fallback to Keras if TFLite missing
+        # Fallback to Keras if TFLite missing (requires full tensorflow)
+        import tensorflow as tf
+        tf.get_logger().setLevel("ERROR")
         tf.config.threading.set_intra_op_parallelism_threads(1)
         tf.config.threading.set_inter_op_parallelism_threads(1)
         from tensorflow.keras.models import load_model
@@ -520,11 +524,16 @@ def classify_disease(image_path):
         raise RuntimeError("Disease model not available")
     
     import numpy as np
-    from tensorflow.keras.utils import load_img, img_to_array
+    from PIL import Image
 
     target = tuple(keras_input_shape[1:3]) if keras_input_shape and len(keras_input_shape) > 2 else (224, 224)
-    img = load_img(image_path, target_size=target)
-    x = img_to_array(img)
+    img = Image.open(image_path).convert('RGB')
+    
+    # Resize the image using BILINEAR resampling (compatible with older and newer Pillow versions)
+    resample_filter = getattr(Image, 'Resampling', Image).BILINEAR
+    img = img.resize(target, resample_filter)
+    
+    x = np.array(img, dtype=np.float32)
     x = np.expand_dims(x, axis=0) / 255.0
     
     if hasattr(keras_model, 'invoke'):
