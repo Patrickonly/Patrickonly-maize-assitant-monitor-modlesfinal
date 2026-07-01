@@ -121,7 +121,7 @@ def allowed_file(filename):
 # ═══════════════════════════════════════════════════════════════════════════════
 # MODEL PATHS
 # ═══════════════════════════════════════════════════════════════════════════════
-YOLO_MODEL_PATHS = ["best.pt"]
+YOLO_MODEL_PATHS = ["best2.pt"]
 KERAS_MODEL_PATHS = ["maizediseaseprogression.keras"]
 DISEASE_LABELS_PATH = "disease_labels.json"
 DISEASE_KNOWLEDGE_BASE_PATHS = [
@@ -498,7 +498,9 @@ def classify_maize(image_path):
     if yolo_model is None:
         raise RuntimeError("YOLO model not available")
     # Run YOLO with minimal output for speed
-    results = yolo_model(image_path, verbose=False, imgsz=224)
+    from PIL import Image
+    img = Image.open(image_path).convert("RGB")
+    results = yolo_model.predict(img, verbose=False, imgsz=224)
     r = results[0]
     if hasattr(r, "probs") and r.probs is not None:
         idx = int(r.probs.top1)
