@@ -655,7 +655,7 @@ def api_predict():
     # Text question
     question = (payload.get("question") or payload.get("message") or request.form.get("question") or "").strip()
     if question:
-        response_text = "Sorry, I don't have an answer for that yet."
+        response_text = "I am the Maize AI Assistant! I can help you with questions about maize diseases and treatments. Please feel free to ask about specific diseases or upload an image for diagnosis."
         label = None
         print(f"\n[TEXT] {question}", flush=True)
         
@@ -696,7 +696,7 @@ def api_predict():
                     print(f"  Joblib error: {e}", flush=True)
 
             # 3. Final fallback: keyword scan in response_map
-            if response_text == "Sorry, I don't have an answer for that yet." or label == "smalltalk":
+            if response_text == "I am the Maize AI Assistant! I can help you with questions about maize diseases and treatments. Please feel free to ask about specific diseases or upload an image for diagnosis." or label == "smalltalk":
                 for k in response_map:
                     if k.lower() in q_lower:
                         label, raw = k, response_map[k]
