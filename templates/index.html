@@ -758,36 +758,27 @@
       const RETRY_DELAY = 10000;  // 10 seconds between retries
       const REQUEST_TIMEOUT = 300000; // 5 minutes for actual inference
 
-      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+        const response = await fetch('/api/predict', {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        // Handle empty or non-JSON responses
+        const text = await response.text();
+        if (!text || !text.trim()) {
+          setLoading(false);
+          showError('Server returned empty response. The model may still be loading — please try again in a moment.');
+          return;
+        }
+
+        let data;
         try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-
-          const response = await fetch('/api/predict', {
-            method: 'POST',
-            body: formData,
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-
-          // Models still loading — auto-retry with countdown
-          if (response.status === 503 && attempt < MAX_RETRIES) {
-            const remaining = MAX_RETRIES - attempt;
-            setLoading(true, `⏳ Models are warming up… retrying in 10s (${remaining} retries left)`);
-            await new Promise(r => setTimeout(r, RETRY_DELAY));
-            continue;
-          }
-
-          // Handle empty or non-JSON responses
-          const text = await response.text();
-          if (!text || !text.trim()) {
-            setLoading(false);
-            showError('Server returned empty response. The model may still be loading — please try again in a moment.');
-            return;
-          }
-
-          let data;
-          try {
             data = JSON.parse(text);
           } catch (parseErr) {
             setLoading(false);
@@ -837,47 +828,16 @@
             showError('Request timed out after 5 minutes. The server may be overloaded. Please try again.');
             return;
           }
-          // Network error on last attempt
-          if (attempt >= MAX_RETRIES) {
-            setLoading(false);
-            showError('Network error: ' + error.message);
-            return;
-          }
-          // Network error — retry
-          setLoading(true, `⏳ Connection issue… retrying in 10s`);
-          await new Promise(r => setTimeout(r, RETRY_DELAY));
+          setLoading(false);
+          showError('Network error: ' + error.message);
+          return;
         }
-      }
-
-      // Exhausted retries
-      setLoading(false);
-      showError('Models are taking longer than expected to load. Please refresh the page and try again in a few minutes.');
     }
 
-    // Poll model readiness on page load — show banner until ready
-    (async function pollModelStatus() {
-      const banner = document.createElement('div');
-      banner.id = 'warmupBanner';
-      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;text-align:center;padding:10px 16px;font-weight:600;font-family:var(--font-display);font-size:0.95rem;display:none;';
-      banner.innerHTML = '⏳ AI models are loading — this takes about 1-2 minutes on first visit…';
-      document.body.prepend(banner);
-
-      let ready = false;
-      for (let i = 0; i < 60; i++) { // Poll for up to 10 minutes
-        try {
-          const res = await fetch('/api/status', { method: 'GET' });
-          const d = await res.json();
-          if (d.models_ready) {
-            ready = true;
-            break;
-          }
-        } catch (e) { /* ignore */ }
-        banner.style.display = 'block';
-        await new Promise(r => setTimeout(r, 10000)); // Check every 10s
-      }
-      banner.style.display = 'none';
-      banner.remove();
-    })();
+    // Focus input on load
+    window.addEventListener('DOMContentLoaded', () => {
+      questionInput.focus();
+    });
   </script>
 </body>
 </html>
