@@ -511,8 +511,8 @@ def classify_maize(image_path):
         name = yolo_model.names[idx]
     else:
         raise RuntimeError("YOLO returned no predictions")
-    # Match user's exact verification script
-    is_maize = "maize" in name.lower()
+    # Strict validation: Only continue if the class is EXACTLY 'maize'
+    is_maize = (name.lower() == "maize")
     return is_maize, name, conf
 
 
