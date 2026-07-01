@@ -647,40 +647,53 @@ def api_predict():
     # Text question
     question = (payload.get("question") or payload.get("message") or request.form.get("question") or "").strip()
     if question:
-        # Text queries can work with just the response_map even without joblib
-        # No need to wait for YOLO/Keras
         response_text = "Sorry, I don't have an answer for that yet."
         label = None
         print(f"\n[TEXT] {question}", flush=True)
+        
+        # 1. First, check if they are asking about a specific disease
+        q_lower = question.lower()
+        disease_keywords = {
+            "rust": "common_rust", "gray leaf": "gray_leaf_spot", 
+            "blight": "leaf_blight", "mildew": "downy_mildew", 
+            "streak virus": "maize_streak_virus", "msv": "maize_streak_virus",
+            "lethal necrosis": "maize_lethal_necrosis", "mln": "maize_lethal_necrosis"
+        }
+        for kw, key in disease_keywords.items():
+            if kw in q_lower and key in knowledge_base:
+                info = knowledge_base[key]
+                label = key
+                response_text = f"{info.get('description', '')} Recommended management: {', '.join(info.get('management', []))}."
+                break
+                
+        # 2. If no direct disease match, try the NLP model
+        if label is None:
+            if joblib_model is not None:
+                try:
+                    pred = joblib_model.predict([q_lower])
+                    label = str(pred[0]).strip().lower()
+                    raw = response_map.get(label)
+                    
+                    # Some inputs might predict "smalltalk" but be actual questions
+                    # Fallback to response_map scan if we didn't get a good match
+                    if raw is None:
+                        for k in response_map:
+                            if k.lower() == label:
+                                raw = response_map[k]
+                                label = k
+                                break
+                    if raw is not None:
+                        response_text = raw[0] if isinstance(raw, list) and raw else str(raw)
+                except Exception as e:
+                    print(f"  Joblib error: {e}", flush=True)
 
-        if joblib_model is not None:
-            try:
-                cleaned = question.lower().strip()
-                pred = joblib_model.predict([cleaned])
-                label = str(pred[0]).strip().lower()
-                raw = response_map.get(label)
-                if raw is None:
-                    for k in response_map:
-                        if k.lower() == label:
-                            raw = response_map[k]
-                            label = k
-                            break
-                if raw is None:
-                    raw = response_text
-                response_text = raw[0] if isinstance(raw, list) and raw else str(raw) if raw else response_text
-            except Exception as e:
-                print(f"  Joblib error: {e}", flush=True)
+            # 3. Final fallback: keyword scan in response_map
+            if response_text == "Sorry, I don't have an answer for that yet." or label == "smalltalk":
                 for k in response_map:
-                    if k.lower() in question.lower():
+                    if k.lower() in q_lower:
                         label, raw = k, response_map[k]
                         response_text = raw[0] if isinstance(raw, list) and raw else str(raw)
                         break
-        else:
-            for k in response_map:
-                if k.lower() in question.lower():
-                    label, raw = k, response_map[k]
-                    response_text = raw[0] if isinstance(raw, list) and raw else str(raw)
-                    break
 
         print(f"  Response: {response_text[:80]}...\n", flush=True)
         return api_response(True, type="text", label=label, response=response_text, model_path=loaded_joblib_path)
