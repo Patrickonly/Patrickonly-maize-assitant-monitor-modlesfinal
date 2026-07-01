@@ -20,6 +20,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 
 import base64
 import json
+import threading
 import uuid
 import warnings
 from datetime import datetime
@@ -136,6 +137,7 @@ keras_model = None
 keras_input_shape = None
 joblib_model = None
 _models_loaded = False
+_models_lock = threading.Lock()
 
 response_map = {}
 intent_labels = []
@@ -260,28 +262,39 @@ def _load_json_artefacts():
 
 
 def _ensure_models_loaded():
-    """Load all models once on first request. Safe to call multiple times."""
+    """Load all models once. Thread-safe — only one thread loads at a time."""
     global _models_loaded
     if _models_loaded:
         return True
-    print("[STARTUP] Loading models on first request...", flush=True)
-    try:
-        _load_yolo()
-        _load_keras()
-        _load_joblib()
-        _models_loaded = True
-        print("[STARTUP] All models loaded.", flush=True)
-        return True
-    except Exception as e:
-        print(f"[STARTUP] Model loading failed: {e}", flush=True)
-        return False
+    with _models_lock:
+        if _models_loaded:          # double-check after acquiring lock
+            return True
+        print("[STARTUP] Loading models...", flush=True)
+        try:
+            _load_yolo()
+            _load_keras()
+            _load_joblib()
+            _models_loaded = True
+            print("[STARTUP] All models loaded.", flush=True)
+            return True
+        except Exception as e:
+            print(f"[STARTUP] Model loading failed: {e}", flush=True)
+            return False
 
 
 # ─── Load JSON artefacts at import time (fast, no heavy deps) ─────────────────
 _load_json_artefacts()
-# ─── Preload models for fast response ─────────────────────────────────────────
-print("[STARTUP] Preloading models for fast response...", flush=True)
-_ensure_models_loaded()
+
+# ─── Load models in a BACKGROUND THREAD so gunicorn can bind the port immediately
+
+def _background_model_load():
+    """Load models in background so the port binds first (critical for Render)."""
+    print("[STARTUP] Background model loading started...", flush=True)
+    _ensure_models_loaded()
+    print("[STARTUP] Background model loading complete.", flush=True)
+
+_loader_thread = threading.Thread(target=_background_model_load, daemon=True)
+_loader_thread.start()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
