@@ -121,7 +121,7 @@ def allowed_file(filename):
 # ═══════════════════════════════════════════════════════════════════════════════
 # MODEL PATHS
 # ═══════════════════════════════════════════════════════════════════════════════
-YOLO_MODEL_PATHS = ["best2.pt"]
+YOLO_MODEL_PATHS = ["best.pt"]
 KERAS_MODEL_PATHS = ["maizediseaseprogression.keras"]
 DISEASE_LABELS_PATH = "disease_labels.json"
 DISEASE_KNOWLEDGE_BASE_PATHS = [
