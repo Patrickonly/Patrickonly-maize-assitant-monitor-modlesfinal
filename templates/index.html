@@ -585,13 +585,14 @@
 
     // Prevent default drag behaviors on the entire window to stop accidental page redirects
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      window.addEventListener(eventName, preventDefaults, false);
+      window.addEventListener(eventName, (e) => e.preventDefault(), false);
     });
 
-    function preventDefaults(e) {
+    // Prevent the textarea from pasting dropped URLs or file paths as text
+    questionInput.addEventListener('drop', (e) => {
       e.preventDefault();
-      e.stopPropagation();
-    }
+      // The event will bubble up to composerCard to handle the actual file drop
+    });
 
     composerCard.addEventListener('dragover', () => {
       composerCard.classList.add('drag-over');
