@@ -28,7 +28,15 @@ import json
 import threading
 import uuid
 import warnings
+import sys
+from unittest.mock import MagicMock
 from datetime import datetime
+
+# Prevent ultralytics from loading matplotlib and building font cache
+sys.modules["matplotlib"] = MagicMock()
+sys.modules["matplotlib.pyplot"] = MagicMock()
+sys.modules["matplotlib.font_manager"] = MagicMock()
+
 from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
 
