@@ -583,24 +583,37 @@
     // --- Drag and Drop Setup ---
     const composerCard = document.querySelector('.composer-card');
 
-    composerCard.addEventListener('dragover', (e) => {
+    // Prevent default drag behaviors on the entire window to stop accidental page redirects
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      window.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
       e.preventDefault();
+      e.stopPropagation();
+    }
+
+    composerCard.addEventListener('dragover', () => {
       composerCard.classList.add('drag-over');
     });
 
-    composerCard.addEventListener('dragleave', (e) => {
-      e.preventDefault();
+    composerCard.addEventListener('dragleave', () => {
       composerCard.classList.remove('drag-over');
     });
 
     composerCard.addEventListener('drop', (e) => {
-      e.preventDefault();
       composerCard.classList.remove('drag-over');
       
-      const file = e.dataTransfer.files[0];
+      const file = e.dataTransfer.files && e.dataTransfer.files[0];
       if (file) {
-        // Manually trigger the handleImageSelect logic
         processFileSelection(file);
+      } else {
+        const url = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('text/uri-list');
+        if (url) {
+          showError("It looks like you dragged an image from another website. Please download it to your computer first, then drag the file here.");
+          // Clear the textarea if the browser accidentally pasted the URL
+          setTimeout(() => { questionInput.value = questionInput.value.replace(url, ''); }, 10);
+        }
       }
     });
     // ---------------------------
