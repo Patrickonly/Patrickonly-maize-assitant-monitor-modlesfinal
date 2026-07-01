@@ -193,13 +193,29 @@ def _load_keras():
     try:
         import tensorflow as tf
         tf.get_logger().setLevel("ERROR")
-        # Minimal threads to reduce memory on free tier
-        tf.config.threading.set_intra_op_parallelism_threads(2)
-        tf.config.threading.set_inter_op_parallelism_threads(2)
+        
+        # Try loading TFLite first (uses 90% less memory!)
+        tflite_path = "maizediseaseprogression.tflite"
+        if os.path.exists(tflite_path):
+            keras_model = tf.lite.Interpreter(model_path=tflite_path, num_threads=1)
+            keras_model.allocate_tensors()
+            
+            input_details = keras_model.get_input_details()
+            # shape is e.g. [1, 224, 224, 3]
+            keras_input_shape = input_details[0]['shape']
+            loaded_keras_path = tflite_path
+            _keras_ready = True
+            print(f"[MODEL] TFLite loaded: {tflite_path}  input_shape={keras_input_shape}", flush=True)
+            gc.collect()
+            return
+
+        # Fallback to Keras if TFLite missing
+        tf.config.threading.set_intra_op_parallelism_threads(1)
+        tf.config.threading.set_inter_op_parallelism_threads(1)
         from tensorflow.keras.models import load_model
         for p in KERAS_MODEL_PATHS:
             if os.path.exists(p):
-                keras_model = load_model(p, compile=False)  # Skip compile — saves memory
+                keras_model = load_model(p, compile=False)
                 keras_input_shape = getattr(keras_model, "input_shape", (None, 224, 224, 3))
                 loaded_keras_path = p
                 _keras_ready = True
@@ -207,7 +223,7 @@ def _load_keras():
                 gc.collect()
                 break
     except Exception as e:
-        print(f"[MODEL] WARNING - Keras load failed: {e}", flush=True)
+        print(f"[MODEL] WARNING - Model load failed: {e}", flush=True)
 
 
 def _load_joblib():
@@ -496,12 +512,13 @@ def classify_maize(image_path):
 
 
 def classify_disease(image_path):
-    """Stage 2: Keras - returns (label_name, condition_name, confidence)."""
+    """Stage 2: Keras/TFLite - returns (label_name, condition_name, confidence)."""
     global keras_model
     if keras_model is None:
         _load_keras()
     if keras_model is None:
-        raise RuntimeError("Keras model not available")
+        raise RuntimeError("Disease model not available")
+    
     import numpy as np
     from tensorflow.keras.utils import load_img, img_to_array
 
@@ -509,8 +526,18 @@ def classify_disease(image_path):
     img = load_img(image_path, target_size=target)
     x = img_to_array(img)
     x = np.expand_dims(x, axis=0) / 255.0
-    # Predict with batch size 1 for speed
-    preds = keras_model.predict(x, verbose=0, batch_size=1)
+    
+    if hasattr(keras_model, 'invoke'):
+        # TFLite inference
+        input_details = keras_model.get_input_details()
+        output_details = keras_model.get_output_details()
+        keras_model.set_tensor(input_details[0]['index'], x.astype(np.float32))
+        keras_model.invoke()
+        preds = keras_model.get_tensor(output_details[0]['index'])
+    else:
+        # Standard Keras inference
+        preds = keras_model.predict(x, verbose=0, batch_size=1)
+        
     arr = preds[0] if len(preds.shape) > 1 else preds
     idx = int(np.argmax(arr))
     conf = float(arr[idx])
