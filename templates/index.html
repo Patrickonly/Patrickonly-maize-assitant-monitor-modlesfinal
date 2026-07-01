@@ -342,10 +342,17 @@
     .composer-card {
       background: rgba(255, 255, 255, 0.9);
       backdrop-filter: var(--glass-blur);
-      border: 1px solid rgba(255,255,255,0.8);
+      border: 2px solid rgba(255,255,255,0.8);
       border-radius: 28px;
       box-shadow: var(--shadow-lg);
       padding: 16px;
+      transition: all 0.2s ease;
+    }
+    
+    .composer-card.drag-over {
+      border-color: var(--green);
+      background: var(--green-light);
+      transform: scale(1.02);
     }
 
     /* Attachments */
@@ -530,7 +537,7 @@
               <textarea id="questionInput" placeholder="Upload an image and describe the symptoms..."></textarea>
               <button type="submit" class="send-btn" title="Send">➤</button>
             </div>
-            <div class="composer-hint">Tip: type your question, or attach a maize leaf image and describe what you see.</div>
+            <div class="composer-hint">Tip: type your question, or drag and drop a maize leaf image here.</div>
           </form>
 
           <div class="loading-line" id="loadingLine">
@@ -572,6 +579,31 @@
         form.requestSubmit();
       }
     });
+
+    // --- Drag and Drop Setup ---
+    const composerCard = document.querySelector('.composer-card');
+
+    composerCard.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      composerCard.classList.add('drag-over');
+    });
+
+    composerCard.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      composerCard.classList.remove('drag-over');
+    });
+
+    composerCard.addEventListener('drop', (e) => {
+      e.preventDefault();
+      composerCard.classList.remove('drag-over');
+      
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        // Manually trigger the handleImageSelect logic
+        processFileSelection(file);
+      }
+    });
+    // ---------------------------
 
     function setQuickPrompt(text) {
       questionInput.value = text;
@@ -679,7 +711,10 @@
     function handleImageSelect(event) {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
+      processFileSelection(file);
+    }
 
+    function processFileSelection(file) {
       const allowedTypes = ['image/jpeg', 'image/png'];
       if (!allowedTypes.includes(file.type)) {
         showError('Please choose a JPG, JPEG, or PNG image.');
